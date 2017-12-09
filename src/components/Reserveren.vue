@@ -89,13 +89,13 @@
 
                   for ( let i = 0; i < this.locationsArray.length; i++ ) {
                     let availableBikes = this.fietsenArray.filter(function( obj ) {
-                      return (obj.name == self.locationsArray[i].name && obj.field_beschikbaarheid == '1');
+                      return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True');
                     });
                     let availablePedelecs = this.fietsenArray.filter(function( obj ) {
-                      return (obj.name == self.locationsArray[i].name && obj.field_beschikbaarheid == '1' && obj.field_fietssoort == '1');
+                      return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '1');
                     });
                     let availableEbikes = this.fietsenArray.filter(function( obj ) {
-                      return (obj.name == self.locationsArray[i].name && obj.field_beschikbaarheid == '1' && obj.field_fietssoort == '2');
+                      return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '2');
                     });
                     this.$set( this.locationsArray[i], 'availableBikes', availableBikes.length.toString())
                     this.$set( this.locationsArray[i], 'availablePedelecs', availablePedelecs.length.toString())

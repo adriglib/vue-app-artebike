@@ -151,7 +151,7 @@
             this.fietsenArray = fietsen
             //console.log('Alle fietsen', this.fietsenArray)
             this.available = this.fietsenArray.filter(function( obj ) {
-              return (obj.name == self.nearestLocation && obj.field_beschikbaarheid == '1');
+              return (obj.name_1 == self.nearestLocation && obj.field_beschikbaarheid == 'True');
             });
             //console.log('availale', this.available)
             this.availableBikes = this.available.length
