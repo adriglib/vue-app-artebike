@@ -18,7 +18,7 @@
       <div class="center-align row">
         <div class="info-block">
           Beschikbare fietsen:
-          <h2 class="orange">7</h2>
+          <h2 class="orange">{{ availableBikes }}</h2>
         </div>
       </div>
       <div class="center-align row">
@@ -42,7 +42,10 @@
     data () {
       return {
         locationsArray: [],
+        fietsenArray: [],
+        availableBikes: '0',
         locations: [],
+        available: [],
         nearestLocation: '',
         loaded: false,
       }
@@ -52,6 +55,7 @@
         .get('http://cms.localhost/api/locations')
         .then(({data:locations}) => {
           this.locationsArray = locations
+          //console.log(this.locationsArray)
           this.loaded = true
           this.mounted()
         })
@@ -74,7 +78,7 @@
         mymap.attributionControl.setPrefix('')
 
         for ( let i = 0; i < this.locationsArray.length; i++ ) {
-          addMarkers(this.locationsArray[i].field_latitude[0].value, this.locationsArray[i].field_longitude[0].value)
+          addMarkers(this.locationsArray[i].field_latitude, this.locationsArray[i].field_longitude)
         }
 
         function addMarkers(latitude, longitude){
@@ -85,7 +89,6 @@
         mymap.locate({setView: true, maxZoom: 16})
 
         //console.log(this.locationsArray)
-        let locArr = this.locationsArray
         let distanceArray = []
 
         function onLocationFound(e) {
@@ -93,12 +96,13 @@
           L.circle(e.latlng, radius).addTo(mymap).bindPopup("You are here").openPopup()
           currentLocation =  e.latlng
 
-          for ( let i = 0; i < locArr.length; i++ ) {
-            distanceArray.push(calculateDistanceBetweenTwoCoordinates(currentLocation.lat, currentLocation.lng, locArr[i].field_latitude[0].value, locArr[i].field_longitude[0].value))
+          for ( let i = 0; i < self.locationsArray.length; i++ ) {
+            distanceArray.push(calculateDistanceBetweenTwoCoordinates(currentLocation.lat, currentLocation.lng, self.locationsArray[i].field_latitude, self.locationsArray[i].field_longitude))
           }
 
           let index = 0;
           let value = distanceArray[0];
+          //console.log(distanceArray)
           for (let i = 1; i < distanceArray.length; i++) {
             if (distanceArray[i] < value) {
               value = distanceArray[i];
@@ -106,7 +110,8 @@
             }
           }
 
-          self.nearestLocation = locArr[index].title[0].value
+          self.nearestLocation = self.locationsArray[index].name
+          self.filterAvailable(self.nearestLocation);
         }
         mymap.on('locationfound', onLocationFound)
 
@@ -137,7 +142,23 @@
           var d = R * c
           return d;//in km
         };
-
+      },
+      filterAvailable(dichtstelocatie) {
+        self = this
+        axios
+          .get('http://cms.localhost/api/fietsen')
+          .then(({data:fietsen}) => {
+            this.fietsenArray = fietsen
+            //console.log('Alle fietsen', this.fietsenArray)
+            this.available = this.fietsenArray.filter(function( obj ) {
+              return (obj.name == self.nearestLocation && obj.field_beschikbaarheid == '1');
+            });
+            //console.log('availale', this.available)
+            this.availableBikes = this.available.length
+          })
+          .catch(({message: error}) => {
+            console.info(error)
+          });
       }
     }
   }
