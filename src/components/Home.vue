@@ -43,10 +43,10 @@
       return {
         locationsArray: [],
         fietsenArray: [],
-        availableBikes: '0',
+        availableBikes: '...',
         locations: [],
         available: [],
-        nearestLocation: '',
+        nearestLocation: 'Loading...',
         loaded: false,
       }
     },

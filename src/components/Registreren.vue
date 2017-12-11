@@ -21,6 +21,14 @@
                 <label for="email">Email</label>
               </div>
             </div>
+            <div class=" row switch">
+              <label>
+                Ik heb geen rijbewijs
+                <input v-model="rijbewijs" type="checkbox">
+                <span class="lever"></span>
+                Ik heb een rijbewijs A of B
+              </label>
+            </div>
             <div class="row">
               <div class="input-field col s12" >
                 <input id="password" type="password" class="validate" v-model="password">
@@ -62,6 +70,7 @@
         name: '',
         surname: '',
         fullname: '',
+        rijbewijs: false,
         email: '',
         password: '',
         passwordConfirm: ''
@@ -125,6 +134,11 @@
                   'value': this.surname
                 }
               ],
+              'field_rijbewijs': [
+                {
+                  'value': this.rijbewijs
+                }
+              ],
               'pass': [
                 {
                   'value': this.password
@@ -152,6 +166,9 @@
           this.successFeedback = 'Je moet alle velden invullen en je wachtwoord bevestiging moet hetzelfde zijn '
         }
       },
+      addUserToLocalStorage () {
+
+      }
     }
   }
 </script>

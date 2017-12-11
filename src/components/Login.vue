@@ -36,6 +36,7 @@
 
 <script>
   import axios from 'axios'
+  import router from 'vue-router'
 
   export default {
     name: 'hello',
@@ -62,7 +63,7 @@
 //    },
     methods: {
       loginUser () {
-
+        self = this
         let config = {
           headers: {
             'Content-Type': 'application/json'
@@ -75,17 +76,12 @@
             "pass": this.login.password
           }, config)
           .then(function (response) {
-            this.set_data('currentUser', response.data)
+            localStorage.setItem( 'currentUser', JSON.stringify(response.data) );
+            //set_data('currentUser', response.data)
+            self.$router.push('/reserveren')
           },
         )
       },
-      set_data(nameOfStorage, thingsToSave){
-        alert('test')
-        //localStorage.setItem( nameOfStorage, thingsToSave );
-      },
-      get_data (nameOfStorage){
-        return localStorage.getItem(nameOfStorage);
-      }
     }
   }
 </script>

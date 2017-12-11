@@ -37,7 +37,8 @@
         <div class="col s10 offset-s1 profile-info">
                 <span class="center-align"><h5 class="orange">Reservatie om: </h5>
 
-                  <input v-model="selectedTime" placeholder="Kies tijd" type="text" class="timepicker col s4 offset-s4" @click="openTimepicker">
+                  <input v-model="selectedTime" :value="selectedTime" placeholder="Kies een tijdstip" type="text" class="timepicker col s6" @click="openTimepicker">
+                  <input v-model="selectedDate" :value="selectedDate" placeholder="Kies een datum" type="text" class="datepicker col s6" @click="openTimepicker">
 
                 </span>
         </div>
@@ -66,7 +67,8 @@
         loaded: false,
         pedelecSelected: false,
         ebikeSelected: false,
-        selectedTime: ''
+        selectedTime: '',
+        selectedDate: ''
       }
     },
     created () {
