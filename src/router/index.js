@@ -5,6 +5,7 @@ import Home from '@/components/Home'
 import Reserveren from '@/components/Reserveren'
 import Login from '@/components/Login'
 import Registreren from '@/components/Registreren'
+import Navigatie from '@/components/Navigatie'
 
 Vue.use(Router)
 
@@ -32,8 +33,13 @@ export default new Router({
     },
     {
       path: '/profiel',
-     // name: 'Profiel',
+      // name: 'Profiel',
       component: Profiel
+    },
+    {
+      path: '/navigatie',
+      // name: 'Profiel',
+      component: Navigatie
     }
   ]
 })

@@ -22,7 +22,7 @@
             <tbody>
             <tr class="white-text"  v-for="location in locationsArray">
               <td>
-                <input class="radio-orange white-text" name="group1" type="radio" :id="location.name" />
+                <input class="radio-orange white-text" v-model="pick" :value="location.id" name="group1" type="radio" :id="location.name" />
                 <label class="white-text" :for="location.name">{{ location.name}}</label>
               </td>
               <td v-if='pedelecSelected' class="center-align">{{ location.availablePedelecs }}</td>
@@ -34,17 +34,24 @@
         </div>
       </div>
       <div class="row">
-        <div class="col s10 offset-s1 profile-info">
-                <span class="center-align"><h5 class="orange">Reservatie om: </h5>
+        <div class="col s10 offset-s1 profile-info row">
+          <span class="center-align"><h5 class="orange">Reservatie om: </h5></span>
 
-                  <input v-model="selectedTime" :value="selectedTime" placeholder="Kies een tijdstip" type="text" class="timepicker col s6" @click="openTimepicker">
-                  <input v-model="selectedDate" :value="selectedDate" placeholder="Kies een datum" type="text" class="datepicker col s6" @click="openTimepicker">
+            <div class="input-field">
+              <select id="selectedDate">
+                <option value="" disabled>Choose your option</option>
+                <option  value="vandaag">Vandaag</option>
+                <option  value="morgen">Morgen</option>
+              </select>
+            </div>
 
-                </span>
+          <!--<input v-for="date in dates" class="radio-orange white-text" v-model="datum" :value="date.name" name="group1" type="radio" :id="1" />-->
+            <input id="selectedTime" v-model="selectedTime" :value="selectedTime" placeholder="Kies een tijdstip" type="text" class="timepicker col s12" @click="">
+
         </div>
       </div>
-      <div class="center-align row">
-        <router-link to="profiel" class="col s6 offset-s3 btn waves-effect waves-light" type="submit" name="action">
+      <div class="center-align row" @click="makeReservation">
+        <router-link to="" class="col s6 offset-s3 btn waves-effect waves-light" type="submit" name="action">
           Bevestig
         </router-link>
       </div>
@@ -62,16 +69,32 @@
         locationsArray: [],
         limitedLocationsArray: [],
         fietsenTypesArray: [],
+        fietsenTypeID: '',
         fietsenArray: [],
         availableArray: [],
         loaded: false,
         pedelecSelected: false,
         ebikeSelected: false,
         selectedTime: '',
-        selectedDate: ''
+        selectedDate: '',
+        pick: ''
       }
     },
     created () {
+      $(document).ready(function() {
+        $('select').material_select();
+        $('.timepicker').pickatime({
+          default: 'now', // Set default time: 'now', '1:30AM', '16:30'
+          fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
+          twelvehour: false, // Use AM/PM or 24-hour format
+          donetext: 'OK', // text for done-button
+          cleartext: 'Verwijder', // text for clear-button
+          canceltext: 'Annuleer', // Text for cancel-button
+          autoclose: false, // automatic close timepicker
+          aftershow: function(){} //Function for after opening timepicker
+        });
+      });
+
       axios
         .get('http://cms.localhost/api/locations')
         .then(({data:locations}) => {
@@ -81,6 +104,7 @@
             .get('http://cms.localhost/api/biketypes')
             .then(({data:fietsen}) => {
               this.fietsenTypesArray = fietsen
+              console.log('fietsentypeArray!!!!',this.fietsenTypesArray)
               axios
                 .get('http://cms.localhost/api/fietsen?_format=json')
                 .then(({data:fietsen}) => {
@@ -121,9 +145,14 @@
       mounted () {
 
       },
+
       selectType(fietssoort) {
         let pedelec = document.querySelector('.Pedelec')
         let ebike = document.querySelector('.E-bike')
+
+        this.fietsenTypeID = fietssoort.id[0].value
+
+
 
         if(fietssoort.id[0].value == '1'){
           this.ebikeSelected = false
@@ -138,17 +167,70 @@
           ebike.classList.add('touchFeedback')
         }
       },
-      openTimepicker() {
-        $('.timepicker').pickatime({
-          default: 'now', // Set default time: 'now', '1:30AM', '16:30'
-          fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
-          twelvehour: false, // Use AM/PM or 24-hour format
-          donetext: 'OK', // text for done-button
-          cleartext: 'Verwijder', // text for clear-button
-          canceltext: 'Annuleer', // Text for cancel-button
-          autoclose: false, // automatic close timepicker
-          aftershow: function(){} //Function for after opening timepicker
-        });
+
+      makeReservation() {
+        console.log($('#selectedDate').parent(["0"]).children()[1].value)
+        console.log($('.timepicker').val())
+        let date = new Date()
+        console.log(date)
+      },
+
+      workingmakeReservation () {
+
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'))
+        let csrf = currentUser.csrf_token
+        let userID = currentUser.current_user.uid
+        let userName = currentUser.current_user.name
+
+
+        let config = {
+          headers: {
+            'X-CSRF-Token': csrf,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          auth: {
+            username: 'cms-user',
+            password: 'secret'
+          },
+        };
+        self=this;
+        axios.post(`http://cms.localhost/entity/reservatie`,
+          {
+            "field_fietstype": [
+              {
+                "target_id": self.fietsenTypeID,
+                "target_type": "fietstype",
+                "url": "http://cms.localhost/api/biketypes/" + self.fietsenTypeID
+              }
+            ],
+            'field_datum': [
+              {
+                'value': '2019-12-27T10:30:00'
+              }
+            ],
+            'field_laadstation': [
+              {
+                "target_id": self.pick,
+                "target_type": "laadstation",
+                "url": "http://cms.localhost/api/locations/" + self.pick
+              }
+            ],
+            'field_user': [
+              {
+                "target_id": userID,
+                "target_type": "user",
+                "url": "http://cms.localhost/user/" + userID,
+                "name": userName
+              }
+            ],
+          }, config)
+          .then(function (response) {
+
+            //set_data('currentUser', response.data)
+            //self.$router.push('/reserveren')
+          })
+      },
       }
 //      available () {
 //
@@ -175,7 +257,6 @@
 //        }
 //        return count;
 //      }
-    }
   }
 </script>
 

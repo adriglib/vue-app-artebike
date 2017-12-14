@@ -3,6 +3,7 @@
     <!-- Page Content goes here -->
     <div class="content align-center">
       <div class="info-block center-align row">
+        <h1>Registreren</h1>
         <div class="row">
           <form class="col s12">
             <div class="row">
