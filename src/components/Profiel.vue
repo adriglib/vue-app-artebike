@@ -159,10 +159,13 @@
                         let laadstationObject = this.locationsArray.find(function (obj) { return obj.id == laadstation });
 
                         let datumInfo = reservationOfCurrentUser[i].field_datum.split(" ")
+                        let correcteUur = datumInfo[0].split(':')[0] - 1
+                        let correcteMinuut = datumInfo[0].split(':')[1]
+                        let uurEnMinuut = correcteUur + ':' + correcteMinuut
 
                         this.$set( this.reservatiesArray[i], 'field_fietstype', fietstypeObject.name[0].value)
                         this.$set( this.reservatiesArray[i], 'field_laadstation', laadstationObject.name)
-                        this.$set( this.reservatiesArray[i], 'field_uur', datumInfo[0])
+                        this.$set( this.reservatiesArray[i], 'field_uur', uurEnMinuut)
                         this.$set( this.reservatiesArray[i], 'field_date', datumInfo[1])
                         this.$set( this.reservatiesArray[i], 'field_latitude', laadstationObject.field_latitude)
                         this.$set( this.reservatiesArray[i], 'field_longitude', laadstationObject.field_longitude)

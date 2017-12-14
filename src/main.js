@@ -8,6 +8,7 @@ Vue.config.productionTip = false
 
 require('../node_modules/leaflet-routing-machine/dist/leaflet-routing-machine.css');
 require('../node_modules/leaflet-routing-machine/dist/leaflet-routing-machine.js')
+require('../static/js/timepicker.js')
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

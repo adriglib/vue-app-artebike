@@ -155,8 +155,8 @@ h2, h3 {
   font-size: 1.4rem;
 }
 .radio-orange[type="radio"]:checked + label:after{
-  border: 2px solid #ffffff;
-  background-color: #ffffff;
+  border: 2px solid #EE9900;
+  background-color: #EE9900;
 }
 
 .selectStation {
@@ -193,22 +193,32 @@ h2, h3 {
 }
 /* label underline focus color */
 .input-field input[type=text]:focus {
-  border-bottom: 1px solid #000;
-  box-shadow: 0 1px 0 0 #000;
+  border-bottom: 1px solid #fff;
+  box-shadow: 0 1px 0 0 #fff;
 }
 /* valid color */
 .input-field input[type=text].valid {
   border-bottom: 1px solid #000;
-  box-shadow: 0 1px 0 0 #000;
+  box-shadow: 0 1px 0 0 #fff;
 }
 /* invalid color */
 .input-field input[type=text].invalid {
-  border-bottom: 1px solid #000;
-  box-shadow: 0 1px 0 0 #000;
+  border-bottom: 1px solid #fff;
+  box-shadow: 0 1px 0 0 #fff;
 }
 /* icon prefix focus color */
 .input-field .prefix.active {
-  color: #000;
+  color: #fff;
+}
+
+/* label focus color */
+.input-field input[type=text]:focus + label {
+  color: #fff;
+}
+/* label underline focus color */
+.input-field input[type=text]:focus {
+  border-bottom: 1px solid #fff;
+  box-shadow: 0 1px 0 0 #fff;
 }
 
 /*map css*/

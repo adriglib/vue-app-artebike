@@ -3,6 +3,7 @@
     <!-- Page Content goes here -->
     <div class="content" >
       <div class="row bikes">
+        <span class="center-align"><h5 class="orange">Selecteer een type fiets: </h5></span>
         <div  class="col s6 center-align" v-for="fietstype in fietsenTypesArray" @click="selectType(fietstype)" :class="fietstype.name[0].value">
           <h5>{{ fietstype.name[0].value }}</h5>
           <img class="col s12" :src="fietstype.field_image[0].url"/>
@@ -10,7 +11,29 @@
         </div>
       </div>
       <div class="row orange-bg">
-        <div class="white-text col s11 offset-s1">
+        <div class="white-text col s10 offset-s1 profile-info row">
+          <span class="center-align"><h5 class="">Reservatie om: </h5></span>
+
+          <div @click="updateAvailibilityAccordingToTimeAndDate" class="input-field">
+            <select id="selectedDate">
+              <option value="" disabled>Choose your option</option>
+              <option  value="vandaag">Vandaag</option>
+              <option  value="morgen">Morgen</option>
+            </select>
+          </div>
+
+         <div @click="updateAvailibilityAccordingToTimeAndDate">
+           <input id="selectedTime" v-model="selectedTime" :value="selectedTime" placeholder="Kies een tijdstip" type="text" class="timepicker col s12">
+
+         </div>
+          <!--<input v-for="date in dates" class="radio-orange white-text" v-model="datum" :value="date.name" name="group1" type="radio" :id="1" />-->
+             <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">Je kan reserveren tussen 06:00u en 23:00u</p>
+             <!--<p class="small-description">{{ foutMelding }}</p>-->
+
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s11 offset-s1">
           <table class="selectStation">
             <thead>
             <tr>
@@ -20,10 +43,10 @@
             </thead>
 
             <tbody>
-            <tr class="white-text"  v-for="location in locationsArray">
+            <tr class=""  v-for="location in locationsArray">
               <td>
-                <input class="radio-orange white-text" v-model="pick" :value="location.id" name="group1" type="radio" :id="location.name" />
-                <label class="white-text" :for="location.name">{{ location.name}}</label>
+                <input class="radio-orange" v-model="pickedLocation" :value="location" name="group1" type="radio" :id="location.name" />
+                <label class="" :for="location.name">{{ location.name}}</label>
               </td>
               <td v-if='pedelecSelected' class="center-align">{{ location.availablePedelecs }}</td>
               <td v-if='ebikeSelected' class="center-align">{{ location.availableEbikes }}</td>
@@ -32,28 +55,14 @@
             </tbody>
           </table>
         </div>
-      </div>
-      <div class="row">
-        <div class="col s10 offset-s1 profile-info row">
-          <span class="center-align"><h5 class="orange">Reservatie om: </h5></span>
-
-            <div class="input-field">
-              <select id="selectedDate">
-                <option value="" disabled>Choose your option</option>
-                <option  value="vandaag">Vandaag</option>
-                <option  value="morgen">Morgen</option>
-              </select>
-            </div>
-
-          <!--<input v-for="date in dates" class="radio-orange white-text" v-model="datum" :value="date.name" name="group1" type="radio" :id="1" />-->
-            <input id="selectedTime" v-model="selectedTime" :value="selectedTime" placeholder="Kies een tijdstip" type="text" class="timepicker col s12" @click="">
-
-        </div>
-      </div>
+      </div><br>
       <div class="center-align row" @click="makeReservation">
         <router-link to="" class="col s6 offset-s3 btn waves-effect waves-light" type="submit" name="action">
           Bevestig
         </router-link>
+      </div>
+      <div class="col s10 offset-s1 profile-info row">
+        <span class="center-align"><h6>{{ foutMelding }}</h6></span>
       </div>
     </div>
   </div>
@@ -77,7 +86,9 @@
         ebikeSelected: false,
         selectedTime: '',
         selectedDate: '',
-        pick: ''
+        pickedLocation: '',
+        foutMelding: '',
+        customDate: ''
       }
     },
     created () {
@@ -90,8 +101,10 @@
           donetext: 'OK', // text for done-button
           cleartext: 'Verwijder', // text for clear-button
           canceltext: 'Annuleer', // Text for cancel-button
-          autoclose: false, // automatic close timepicker
-          aftershow: function(){} //Function for after opening timepicker
+          autoclose: false, // automatic close timepicker,
+          afterShow: function () {
+            console.log('tetsikhz:jd')
+          }
         });
       });
 
@@ -143,7 +156,6 @@
     },
     methods: {
       mounted () {
-
       },
 
       selectType(fietssoort) {
@@ -168,21 +180,106 @@
         }
       },
 
-      makeReservation() {
-        console.log($('#selectedDate').parent(["0"]).children()[1].value)
-        console.log($('.timepicker').val())
+      updateAvailibilityAccordingToTimeAndDate () {
         let date = new Date()
-        console.log(date)
+        let day
+
+        this.selectedDate = $('#selectedDate').parent(["0"]).children()[1].value
+        this.selectedTime = $('.timepicker').val()
+        if (this.selectedDate == 'Vandaag') {
+          day = date.getDate()
+        }
+        else if (this.selectedDate == 'Morgen') {
+          day = date.getDate() + 1
+        }
+
+
+        if (this.selectedTime.split(':')[0] < 6 || this.selectedTime.split(':')[0] >= 23){
+          this.customDate = '';
+          this.foutMelding = 'Je kan niet reserveren voor 6u of na 23u.'
+        }
+        else{
+          this.customDate = date.getFullYear() + '-' + str_pad(date.getMonth() + 1) + '-' + str_pad(day) + 'T' + $('.timepicker').val() + ':00';
+        }
+        function str_pad(n) {
+          return String("0" + n).slice(-2);
+        }
+//alert('2017-12-14T17:41:00')
+
+
+        for ( let i = 0; i < this.locationsArray.length; i++ ) {
+          let availableBikes = this.fietsenArray.filter(function( obj ) {
+
+            //alert(self.customDate.substr(-8, 5).replace(":",""))
+            if(obj.field_datum_bezet != false){
+              return (obj.name_1 == self.locationsArray[i].name &&
+                      obj.field_beschikbaarheid == 'True' &&
+                      (obj.field_datum_bezet.substr(0, 10) != self.customDate.substr(0, 10)
+                        && obj.field_datum_bezet.substr(-8, 5).replace(":","") != self.customDate.substr(-8, 5).replace(":","")));
+            }
+            else {
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True');
+            }
+          });
+          let availablePedelecs = this.fietsenArray.filter(function( obj ) {
+            if(obj.field_datum_bezet != false)
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '1' && (obj.field_datum_bezet.substr(0, 10) != self.customDate.substr(0, 10) && obj.field_datum_bezet.substr(-8, 5).replace(":","") != self.customDate.substr(-8, 5).replace(":","")) );
+            else
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '1');
+          });
+          let availableEbikes = this.fietsenArray.filter(function( obj ) {
+            if(obj.field_datum_bezet != false){
+              let timeObject = obj.field_datum_bezet.substr(-8, 5).replace(":","")
+              let timeInput = self.customDate.substr(-8, 5).replace(":","")
+              let dateObject = obj.field_datum_bezet.substr(0, 10)
+              let dateInput = self.customDate.substr(0, 10)
+
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && (obj.field_fietssoort == '2')
+                && (!((parseInt(timeObject)+100 > parseInt(timeInput)) && (parseInt(timeObject)-100 < parseInt(timeInput))) || (dateObject != dateInput))
+              );
+            }
+            else
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '2');
+          });
+          this.$set( this.locationsArray[i], 'availableBikes', availableBikes.length.toString())
+          this.$set( this.locationsArray[i], 'availablePedelecs', availablePedelecs.length.toString())
+          this.$set( this.locationsArray[i], 'availableEbikes', availableEbikes.length.toString())
+        }
+        console.log( this.locationsArray)
       },
 
-      workingmakeReservation () {
-
+      makeReservation () {
         let currentUser = JSON.parse(localStorage.getItem('currentUser'))
         let csrf = currentUser.csrf_token
         let userID = currentUser.current_user.uid
         let userName = currentUser.current_user.name
+//        let date = new Date()
+//        let day
 
+//        this.selectedDate = $('#selectedDate').parent(["0"]).children()[1].value
+//        this.selectedTime = $('.timepicker').val()
+//          if (this.selectedDate == 'Vandaag') {
+//            day = date.getDate()
+//          }
+//          else if (this.selectedDate == 'Morgen') {
+//            day = date.getDate() + 1
+//          }
+//
+//          if (this.selectedTime.split(':')[0] < 6 || this.selectedTime.split(':')[0] >= 23){
+//            this.customDate = '';
+//          this.foutMelding = 'Je kan niet reserveren voor 6u of na 23u.'
+//        }
+//          else{
+//            this.customDate = date.getFullYear() + '-' + str_pad(date.getMonth() + 1) + '-' + str_pad(day) + 'T' + $('.timepicker').val() + ':00';
+//          }
+//            function str_pad(n) {
+//          return String("0" + n).slice(-2);
+//        }
 
+        let IDFromSelectedBike = this.fietsenArray.filter(function( obj ) {
+          return (obj.field_fietssoort == self.fietsenTypeID && obj.field_beschikbaarheid == 'True' && obj.name_1 == self.pickedLocation.name);
+        });
+//          console.log('teeeeeeeeeeest', IDFromSelectedBike[0].id, self.fietsenTypeID, self.pickedLocation.name)
         let config = {
           headers: {
             'X-CSRF-Token': csrf,
@@ -206,14 +303,14 @@
             ],
             'field_datum': [
               {
-                'value': '2019-12-27T10:30:00'
+                'value': self.customDate
               }
             ],
             'field_laadstation': [
               {
-                "target_id": self.pick,
+                "target_id": self.pickedLocation.id,
                 "target_type": "laadstation",
-                "url": "http://cms.localhost/api/locations/" + self.pick
+                "url": "http://cms.localhost/api/locations/" + self.pickedLocation.id
               }
             ],
             'field_user': [
@@ -226,37 +323,27 @@
             ],
           }, config)
           .then(function (response) {
-
-            //set_data('currentUser', response.data)
-            //self.$router.push('/reserveren')
+            self.$router.push('/profiel')
+            axios.patch(`http://cms.localhost/artebike/fiets/` + IDFromSelectedBike[0].id,
+              {
+                'field_datum_bezet' : {
+                  'value': self.customDate
+                }
+              }, config).then(function (response) {}).catch(({message: error}) => {
+              //Materialize.toast('I am a toast!', 4000)
+              //alert('Er is iets misgegaan, heb je al de velden ingevuld?')
+              console.info(error)
+            })
+          })
+          .catch(({message: error}) => {
+            //Materialize.toast('I am a toast!', 4000)
+            if(this.foutMelding == '')
+              this.foutMelding = 'Er is iets misgegaan, heb je al de velden ingevuld?'
+            //alert('Er is iets misgegaan, heb je al de velden ingevuld?')
+            console.info(error)
           })
       },
       }
-//      available () {
-//
-//        for(let a = 0; a < this.fietsenArray.length ; a++){
-//          let locationName = this.fietsenArray[a].name
-//          //console.log(locationName)
-//          for (let b = 0; b < this.namesOfLocations.length; b++){
-//            //console.log(this.namesOfLocations[b])
-//            if(locationName == this.namesOfLocations[b]){
-//              this.availableArray.push(this.namesOfLocations[b])
-//              var test = this.countInArray(this.namesOfLocations)
-//            }
-//          }
-//        }
-//        console.log(test)
-//        console.log('tttttttttttest', this.availableArray)
-//      },
-//      countInArray(array, what) {
-//        var count = 0;
-//        for (var i = 0; i < array.length; i++) {
-//          if (array[i] === what) {
-//            count++;
-//          }
-//        }
-//        return count;
-//      }
   }
 </script>
 
