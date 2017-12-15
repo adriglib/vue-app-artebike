@@ -76,7 +76,7 @@
       checkIfOnline () {
         self = this
         if(localStorage.getItem('currentUser') == null){
-          self.fullName = 'NIET INGELOGD'
+          self.fullName = 'Log je in..'
           self.$router.push('/login')
         }
         else {

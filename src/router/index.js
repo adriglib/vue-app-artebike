@@ -14,11 +14,18 @@ export default new Router({
     {
       path: '/',
       // name: 'home',
-      component: Home
+      component: Home,
+      beforeEnter: (to, from, next) => {
+        if(localStorage.getItem('currentUser') == null){
+          to: Login
+        }
+        else
+          next()
+      }
     },
     {
       path: '/login',
-      // name: 'Login',
+      name: 'Login',
       component: Login
     },
     {
@@ -28,18 +35,39 @@ export default new Router({
     },
     {
       path: '/reserveren',
-     // name: 'Reserveren',
-      component: Reserveren
+      name: 'Reserveren',
+      component: Reserveren,
+      beforeEnter: (to, from, next) => {
+        if(localStorage.getItem('currentUser') == null){
+          to: Login
+        }
+        else
+          next()
+      }
     },
     {
       path: '/profiel',
-      // name: 'Profiel',
-      component: Profiel
+      name: 'Profiel',
+      component: Profiel,
+      beforeEnter: (to, from, next) => {
+        if(localStorage.getItem('currentUser') == null){
+          to: Login
+        }
+        else
+          next()
+      }
     },
     {
       path: '/navigatie',
       // name: 'Profiel',
-      component: Navigatie
+      component: Navigatie,
+      beforeEnter: (to, from, next) => {
+        if(localStorage.getItem('currentUser') == null){
+          to: Login
+        }
+        else
+          next()
+      }
     }
   ]
 })

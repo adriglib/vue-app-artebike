@@ -193,7 +193,6 @@
           day = date.getDate() + 1
         }
 
-
         if (this.selectedTime.split(':')[0] < 6 || this.selectedTime.split(':')[0] >= 23){
           this.customDate = '';
           this.foutMelding = 'Je kan niet reserveren voor 6u of na 23u.'
@@ -209,21 +208,30 @@
 
         for ( let i = 0; i < this.locationsArray.length; i++ ) {
           let availableBikes = this.fietsenArray.filter(function( obj ) {
-
-            //alert(self.customDate.substr(-8, 5).replace(":",""))
             if(obj.field_datum_bezet != false){
-              return (obj.name_1 == self.locationsArray[i].name &&
-                      obj.field_beschikbaarheid == 'True' &&
-                      (obj.field_datum_bezet.substr(0, 10) != self.customDate.substr(0, 10)
-                        && obj.field_datum_bezet.substr(-8, 5).replace(":","") != self.customDate.substr(-8, 5).replace(":","")));
+              let timeObject = obj.field_datum_bezet.substr(-8, 5).replace(":","")
+              let timeInput = self.customDate.substr(-8, 5).replace(":","")
+              let dateObject = obj.field_datum_bezet.substr(0, 10)
+              let dateInput = self.customDate.substr(0, 10)
+
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True'
+                && (!((parseInt(timeObject)+100 > parseInt(timeInput)) && (parseInt(timeObject)-100 < parseInt(timeInput))) || (dateObject != dateInput))
+              );
             }
-            else {
-              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True');
-            }
+            else
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '2');
           });
           let availablePedelecs = this.fietsenArray.filter(function( obj ) {
-            if(obj.field_datum_bezet != false)
-              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '1' && (obj.field_datum_bezet.substr(0, 10) != self.customDate.substr(0, 10) && obj.field_datum_bezet.substr(-8, 5).replace(":","") != self.customDate.substr(-8, 5).replace(":","")) );
+            if(obj.field_datum_bezet != false){
+              let timeObject = obj.field_datum_bezet.substr(-8, 5).replace(":","")
+              let timeInput = self.customDate.substr(-8, 5).replace(":","")
+              let dateObject = obj.field_datum_bezet.substr(0, 10)
+              let dateInput = self.customDate.substr(0, 10)
+
+              return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && (obj.field_fietssoort == '1')
+                && (!((parseInt(timeObject)+100 > parseInt(timeInput)) && (parseInt(timeObject)-100 < parseInt(timeInput))) || (dateObject != dateInput))
+              );
+            }
             else
               return (obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == 'True' && obj.field_fietssoort == '1');
           });
@@ -253,33 +261,11 @@
         let csrf = currentUser.csrf_token
         let userID = currentUser.current_user.uid
         let userName = currentUser.current_user.name
-//        let date = new Date()
-//        let day
-
-//        this.selectedDate = $('#selectedDate').parent(["0"]).children()[1].value
-//        this.selectedTime = $('.timepicker').val()
-//          if (this.selectedDate == 'Vandaag') {
-//            day = date.getDate()
-//          }
-//          else if (this.selectedDate == 'Morgen') {
-//            day = date.getDate() + 1
-//          }
-//
-//          if (this.selectedTime.split(':')[0] < 6 || this.selectedTime.split(':')[0] >= 23){
-//            this.customDate = '';
-//          this.foutMelding = 'Je kan niet reserveren voor 6u of na 23u.'
-//        }
-//          else{
-//            this.customDate = date.getFullYear() + '-' + str_pad(date.getMonth() + 1) + '-' + str_pad(day) + 'T' + $('.timepicker').val() + ':00';
-//          }
-//            function str_pad(n) {
-//          return String("0" + n).slice(-2);
-//        }
 
         let IDFromSelectedBike = this.fietsenArray.filter(function( obj ) {
           return (obj.field_fietssoort == self.fietsenTypeID && obj.field_beschikbaarheid == 'True' && obj.name_1 == self.pickedLocation.name);
         });
-//          console.log('teeeeeeeeeeest', IDFromSelectedBike[0].id, self.fietsenTypeID, self.pickedLocation.name)
+
         let config = {
           headers: {
             'X-CSRF-Token': csrf,

@@ -95,10 +95,6 @@
       },
       checkIfOnline () {
         self = this
-        if(localStorage.getItem('currentUser') == null){
-          self.$router.push('/login')
-        }
-        else {
           let currentUser = JSON.parse(localStorage.getItem('currentUser'))
           this.email = currentUser.current_user.name
 
@@ -185,7 +181,6 @@
             .catch(({message: error}) => {
               console.info(error)
             });
-        }
       },
     }
   }
