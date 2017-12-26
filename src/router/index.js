@@ -37,6 +37,7 @@ export default new Router({
       path: '/reserveren',
       name: 'Reserveren',
       component: Reserveren,
+      props: { currentRoute: 'reserveren' },
       beforeEnter: (to, from, next) => {
         if(localStorage.getItem('currentUser') == null){
           to: Login
@@ -49,6 +50,7 @@ export default new Router({
       path: '/profiel',
       name: 'Profiel',
       component: Profiel,
+      props: { currentRoute: 'profiel' },
       beforeEnter: (to, from, next) => {
         if(localStorage.getItem('currentUser') == null){
           to: Login

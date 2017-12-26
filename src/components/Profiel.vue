@@ -30,12 +30,15 @@
                 Een {{ reservation.field_fietstype }} gereserveerd aan laadstation {{ reservation.field_laadstation }}
                 om {{ reservation.field_uur }} op {{ reservation.field_date }}
                 </li>
-                <span class="extra-button-div" @click="addWantedLocationToLocalStorage(reservation)"><router-link to="navigatie" class="col s4 btn waves-effect waves-light extra-button" type="submit" name="action">
+                <span class="extra-button-div" @click="addWantedLocationToLocalStorage(reservation)"><router-link to="navigatie" class="col s3 btn waves-effect waves-light extra-button" type="submit" name="action">
                   <i class="material-icons">navigation</i>
                 </router-link></span>
-                <span class="extra-button-div" @click="logout"><router-link to="login" class="col s4 offset-l btn waves-effect waves-light extra-button" type="submit" name="action">
-                  <i class="material-icons">edit</i>
-                </router-link></span>
+                <span @click="deleteReservation(reservation)" class="extra-button-div"><a href="#" class="col s3 offset-l btn waves-effect waves-light extra-button" type="submit" name="action">
+                  <i class="material-icons">delete</i>
+                </a></span>
+                <span class="extra-button-div"><a href="#" class="col s3 offset-l btn waves-effect waves-light extra-button" type="submit" name="action">
+                  <i class="material-icons">check</i>
+                </a></span>
                 <br>
               </ul>
 
@@ -53,6 +56,7 @@
 
 <script>
   import axios from 'axios'
+  import { bus } from '../main';
 
   export default {
     name: 'profiel',
@@ -91,7 +95,11 @@
         localStorage.setItem('wantedLocation', JSON.stringify(info))
       },
       logout() {
+        bus.$emit('userLogout')
         localStorage.removeItem('currentUser')
+      },
+      deleteReservation(info) {
+        console.log('test')
       },
       checkIfOnline () {
         self = this

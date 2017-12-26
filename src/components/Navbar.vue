@@ -7,18 +7,19 @@
             <div class="background orange-bg">
               <!--<img src="img/background-sidebar.jpg">-->
             </div>
-            <router-link to="/"><img class="" src="static/img/logo_white.png"></router-link>
-            <router-link to="/login"><span class="white-text name">{{ fullName }}</span><span>{{ email }}</span></router-link>
+            <!--<router-link to="/"><img class="" src="static/img/logo_white.png"></router-link>-->
+            <router-link v-if="loggedIn == false" to="/login" style="padding-bottom: 20px;"><span class="white-text name">{{ fullName }}</span></router-link>
+            <router-link v-if="loggedIn" to="/profiel" style="padding-bottom: 20px;"><span class="white-text name">{{ fullName }}</span><span>{{ email }}</span></router-link>
           </div>
         </li>
-        <li><router-link to="/profiel" class="waves-effect"><i class="material-icons">person</i>Profiel</router-link></li>
-        <li><router-link to="/" class="waves-effect"><i class="material-icons">room</i>Reserveren</router-link></li>
-        <li><router-link to="/reserveren" class="waves-effect"><i class="material-icons">battery_charging_full</i>Laadstations</router-link></li>
-        <li><router-link to="/profiel" class="waves-effect"><i class="material-icons">directions_bike</i>Reservaties</router-link></li>
-        <div class="divider"></div>
-        <li @click="logout()"><router-link to="" class="waves-effect"><i class="material-icons">exit_to_app</i>Logout</router-link></li>
-
-        <div class="divider"></div>
+        <li v-if="loggedIn"><router-link to="/profiel" class="waves-effect"><i class="material-icons">person</i>Profiel</router-link></li>
+        <li v-if="loggedIn"><router-link to="/" class="waves-effect"><i class="material-icons">room</i>Dichtbij</router-link></li>
+        <li v-if="loggedIn"><router-link to="/reserveren" class="waves-effect"><i class="material-icons">battery_charging_full</i>Reserveer</router-link></li>
+        <div v-if="loggedIn" class="divider"></div>
+        <li v-if="loggedIn" @click="logout()"><router-link to="" class="waves-effect"><i class="material-icons">exit_to_app</i>Logout</router-link></li>
+        <div v-if="loggedIn" class="divider"></div>
+        <li v-if="loggedIn == false"><router-link to="/login" class="waves-effect"><i class="material-icons">input</i>Login</router-link></li>
+        <li v-if="loggedIn == false"><router-link to="/registreren" class="waves-effect"><i class="material-icons">add</i>Registreren</router-link></li>
         <li><router-link to="" class="waves-effect"><i class="material-icons">info</i>Voorwaarden</router-link></li>
         <li><router-link to="" class="waves-effect"><i class="material-icons">help</i>Hulp</router-link></li>
       </ul>
@@ -53,33 +54,44 @@
 
 <script>
   import axios from 'axios'
+  import { bus } from '../main';
 
   export default {
     name: 'profiel',
     data () {
       return {
         userID: '',
-        fullName: 'Loading...',
+        fullName: 'Je bent afgemeld...',
         email: '',
+        loggedIn: false
       }
     },
     created () {
-      //this.checkIfOnline()
+      bus.$on('userLogin', () => {
+        this.checkIfOnline()
+      })
+      bus.$on('userLogout', () => {
+        this.logout()
+      })
     },
     mounted () {
       this.checkIfOnline()
     },
     methods: {
       logout() {
+        //alert('testlogout')
+        this.fullName = 'Je bent afgemeld...'
+        this.loggedIn = false
         localStorage.removeItem('currentUser')
       },
       checkIfOnline () {
+       //alert('alertifonline')
         self = this
         if(localStorage.getItem('currentUser') == null){
-          self.fullName = 'Log je in..'
-          self.$router.push('/login')
+          self.fullName = 'Je bent afgemeld...'
         }
         else {
+          this.loggedIn = true
           let currentUser = JSON.parse(localStorage.getItem('currentUser'))
           this.email = currentUser.current_user.name
           let userID = currentUser.current_user.uid

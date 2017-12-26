@@ -6,6 +6,8 @@ import router from './router'
 
 Vue.config.productionTip = false
 
+export const bus = new Vue();
+
 require('../node_modules/leaflet-routing-machine/dist/leaflet-routing-machine.css');
 require('../node_modules/leaflet-routing-machine/dist/leaflet-routing-machine.js')
 require('../static/js/timepicker.js')

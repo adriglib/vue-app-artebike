@@ -38,6 +38,7 @@
 <script>
   import axios from 'axios'
   import router from 'vue-router'
+  import { bus } from '../main';
 
   export default {
     name: 'hello',
@@ -47,6 +48,7 @@
           email: 'nickboon',
           password: 'test'
         },
+        currentRoute: '',
         errors: []
       }
     },
@@ -78,7 +80,7 @@
           }, config)
           .then(function (response) {
             localStorage.setItem( 'currentUser', JSON.stringify(response.data) );
-            //set_data('currentUser', response.data)
+            bus.$emit('userLogin', true)
             self.$router.push('/reserveren')
           },
         )

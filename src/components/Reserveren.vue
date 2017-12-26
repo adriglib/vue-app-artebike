@@ -88,7 +88,8 @@
         selectedDate: '',
         pickedLocation: '',
         foutMelding: '',
-        customDate: ''
+        customDate: '',
+        currentRoute: ''
       }
     },
     created () {
