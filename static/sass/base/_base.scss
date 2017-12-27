@@ -1,0 +1,23 @@
+/* _-_-_- base/BASE -_-_-_ */
+@charset 'utf-8';
+
+.orange {
+  color: $orange;
+  background-color: transparent !important;
+}
+
+
+/*BACKGROUND COLORS*/
+.orange-bg {
+  background-color: $orange;
+}
+
+.align-center {
+  margin: 0 auto;
+}
+
+/* CENTER ALIGN */
+.input-suffix {
+  position: relative;
+  top: $medium-smaller-space;
+}

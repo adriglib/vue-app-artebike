@@ -1,0 +1,23 @@
+/* _-_-_- base/TYPOGRAPHY -_-_-_ */
+
+body {
+  font-family: $worksans;
+  font-size: $text-font-size;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $playfair;
+}
+
+h2, h3 {
+  margin: $small-space 0px $very-large-space 0px;
+}
+
+a {
+  color: $darkgrey;
+}
+
+.small-description {
+  margin-top: $normal-space;
+  font-size: $description-font-size;
+}

@@ -1,0 +1,44 @@
+/* _-_-_- layout/NAVIGATION -_-_-_ */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  z-index: $level5;
+}
+
+nav {
+  line-height: 0;
+}
+
+nav .button-collapse {
+  margin: 0;
+  float: none;
+}
+
+nav .row {
+  margin: 0;
+}
+
+nav .brand-logo i, nav .brand-logo [class^="mdi-"], nav .brand-logo [class*="mdi-"], nav .brand-logo i.material-icons {
+  margin: 0;
+}
+.menu-items li {
+  position: relative;
+  bottom: $small-space;
+  margin: 0;
+}
+.menu-items span {
+  position: relative;
+  bottom: $smaller-space;
+}
+nav ul li.active    ,
+nav ul a:hover{
+  background-color: transparent;
+}
+
+nav ul a:hover i{
+  color: $orange;
+}
+
+#sidenav-overlay {
+  background-color: transparent;
+}

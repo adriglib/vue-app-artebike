@@ -80,6 +80,29 @@
           }, config)
           .then(function (response) {
             localStorage.setItem( 'currentUser', JSON.stringify(response.data) );
+            let currentUser = JSON.parse(localStorage.getItem('currentUser'))
+            let csrf = currentUser.csrf_token
+            let userID = currentUser.current_user.uid
+            let url =  'http://cms.localhost/user/' + userID +'?_format=json'
+            let config = {
+              headers: {
+                'X-CSRF-Token': csrf,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              auth: {
+                username: 'cms-user',
+                password: 'secret'
+              },
+            };
+            axios.get(url, config)
+              .then(({data:users}) => {
+                console.log(users.field_rijbewijs[0].value)
+                localStorage.setItem( 'hasDrivingLicense', JSON.stringify({"rijbewijs": users.field_rijbewijs[0].value}) );
+              })
+              .catch(({message: error}) => {
+                console.info(error)
+              })
             bus.$emit('userLogin', true)
             self.$router.push('/reserveren')
           },

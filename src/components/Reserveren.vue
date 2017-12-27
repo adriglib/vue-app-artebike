@@ -9,6 +9,7 @@
           <img class="col s12" :src="fietstype.field_image[0].url"/>
           <p class="small-description">{{ fietstype.field_beschrijving[0].value }}</p>
         </div>
+        <p v-if="noLicense == true" class="col s10 offset-s1 small-description center-align">Je hebt een rijbewijs nodig om met een pedelec te rijden. Heb je een rijbewijs? Stuur een mailtje via de website om dit te bevestigen, we contacteren je dan met verdere instrcuties.</p>
       </div>
       <div class="row orange-bg">
         <div class="white-text col s10 offset-s1 profile-info row">
@@ -27,7 +28,7 @@
 
          </div>
           <!--<input v-for="date in dates" class="radio-orange white-text" v-model="datum" :value="date.name" name="group1" type="radio" :id="1" />-->
-             <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">Je kan reserveren tussen 06:00u en 23:00u</p>
+             <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">Je kan reserveren tussen 06:00u en 23:00u. Opgelet, een uur na het begin van de reservatie moet deze terugstaan in een laadstation naar keuze, als dit niet zo is zal dit gevolgen hebben. Surf naar onze website voor meer informatie.</p>
              <!--<p class="small-description">{{ foutMelding }}</p>-->
 
         </div>
@@ -89,7 +90,8 @@
         pickedLocation: '',
         foutMelding: '',
         customDate: '',
-        currentRoute: ''
+        currentRoute: '',
+        noLicense: 'notSelected'
       }
     },
     created () {
@@ -160,6 +162,7 @@
       },
 
       selectType(fietssoort) {
+        let self = this
         let pedelec = document.querySelector('.Pedelec')
         let ebike = document.querySelector('.E-bike')
 
@@ -170,14 +173,24 @@
         if(fietssoort.id[0].value == '1'){
           this.ebikeSelected = false
           this.pedelecSelected = true
-          ebike.classList.remove('touchFeedback')
-          pedelec.classList.add('touchFeedback')
+          let rijbewijsObject = JSON.parse(localStorage.getItem('hasDrivingLicense'))
+
+          console.log(rijbewijsObject.rijbewijs)
+          if(rijbewijsObject.rijbewijs == true){
+            ebike.classList.remove('touchFeedback')
+            pedelec.classList.add('touchFeedback')
+            self.noLicense = false
+        }
+          else {
+            self.noLicense = true
+          }
         }
         else {
           this.pedelecSelected = false
           this.ebikeSelected = true
           pedelec.classList.remove('touchFeedback')
           ebike.classList.add('touchFeedback')
+          self.noLicense = false
         }
       },
 
@@ -279,56 +292,69 @@
           },
         };
         self=this;
-        axios.post(`http://cms.localhost/entity/reservatie`,
-          {
-            "field_fietstype": [
-              {
-                "target_id": self.fietsenTypeID,
-                "target_type": "fietstype",
-                "url": "http://cms.localhost/api/biketypes/" + self.fietsenTypeID
-              }
-            ],
-            'field_datum': [
-              {
-                'value': self.customDate
-              }
-            ],
-            'field_laadstation': [
-              {
-                "target_id": self.pickedLocation.id,
-                "target_type": "laadstation",
-                "url": "http://cms.localhost/api/locations/" + self.pickedLocation.id
-              }
-            ],
-            'field_user': [
-              {
-                "target_id": userID,
-                "target_type": "user",
-                "url": "http://cms.localhost/user/" + userID,
-                "name": userName
-              }
-            ],
-          }, config)
-          .then(function (response) {
-            self.$router.push('/profiel')
-            axios.patch(`http://cms.localhost/artebike/fiets/` + IDFromSelectedBike[0].id,
-              {
-                'field_datum_bezet' : {
-                  'value': self.customDate
-                }
-              }, config).then(function (response) {}).catch(({message: error}) => {
-              //Materialize.toast('I am a toast!', 4000)
-              //alert('Er is iets misgegaan, heb je al de velden ingevuld?')
-              console.info(error)
-            })
-          })
-          .catch(({message: error}) => {
-            //Materialize.toast('I am a toast!', 4000)
-            if(this.foutMelding == '')
-              this.foutMelding = 'Er is iets misgegaan, heb je al de velden ingevuld?'
-            //alert('Er is iets misgegaan, heb je al de velden ingevuld?')
-            console.info(error)
-          })
+        if(this.noLicense == false && this.noLicense != 'notSelected'){
+          if(this.pickedLocation != ''){
+            if(this.selectedTime != ''){
+              axios.post(`http://cms.localhost/entity/reservatie`,
+                {
+                  "field_fietstype": [
+                    {
+                      "target_id": self.fietsenTypeID,
+                      "target_type": "fietstype",
+                      "url": "http://cms.localhost/api/biketypes/" + self.fietsenTypeID
+                    }
+                  ],
+                  'field_datum': [
+                    {
+                      'value': self.customDate
+                    }
+                  ],
+                  'field_laadstation': [
+                    {
+                      "target_id": self.pickedLocation.id,
+                      "target_type": "laadstation",
+                      "url": "http://cms.localhost/api/locations/" + self.pickedLocation.id
+                    }
+                  ],
+                  'field_user': [
+                    {
+                      "target_id": userID,
+                      "target_type": "user",
+                      "url": "http://cms.localhost/user/" + userID,
+                      "name": userName
+                    }
+                  ],
+                }, config)
+                .then(function (response) {
+                  self.$router.push('/profiel')
+                  axios.patch(`http://cms.localhost/artebike/fiets/` + IDFromSelectedBike[0].id,
+                    {
+                      'field_datum_bezet' : {
+                        'value': self.customDate
+                      }
+                    }, config).then(function (response) {}).catch(({message: error}) => {
+                    //Materialize.toast('I am a toast!', 4000)
+                    //alert('Er is iets misgegaan, heb je al de velden ingevuld?')
+                    console.info(error)
+                  })
+                })
+                .catch(({message: error}) => {
+                  //Materialize.toast('I am a toast!', 4000)
+                  if(this.foutMelding == '')
+                    this.foutMelding = 'Er is iets misgegaan, heb je al de velden ingevuld?'
+                  //alert('Er is iets misgegaan, heb je al de velden ingevuld?')
+                  console.info(error)
+                })
+            }
+            else
+              alert('You have to select a time!')
+          }
+          else
+            alert('You have to select a location!')
+        }
+        else{
+          alert('You have to select a (valid) biketype!')
+        }
       },
       }
   }

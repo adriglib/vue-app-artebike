@@ -13,11 +13,11 @@ export default new Router({
   routes: [
     {
       path: '/',
-      // name: 'home',
+      name: 'home',
       component: Home,
       beforeEnter: (to, from, next) => {
         if(localStorage.getItem('currentUser') == null){
-          to: Login
+          next('/login')
         }
         else
           next()
@@ -30,7 +30,7 @@ export default new Router({
     },
     {
       path: '/registreren',
-      // name: 'Registreren',
+      name: 'Registreren',
       component: Registreren
     },
     {
@@ -40,7 +40,7 @@ export default new Router({
       props: { currentRoute: 'reserveren' },
       beforeEnter: (to, from, next) => {
         if(localStorage.getItem('currentUser') == null){
-          to: Login
+          next('/login')
         }
         else
           next()
@@ -53,7 +53,7 @@ export default new Router({
       props: { currentRoute: 'profiel' },
       beforeEnter: (to, from, next) => {
         if(localStorage.getItem('currentUser') == null){
-          to: Login
+          next('/login')
         }
         else
           next()
@@ -65,7 +65,7 @@ export default new Router({
       component: Navigatie,
       beforeEnter: (to, from, next) => {
         if(localStorage.getItem('currentUser') == null){
-          to: Login
+          next('/login')
         }
         else
           next()

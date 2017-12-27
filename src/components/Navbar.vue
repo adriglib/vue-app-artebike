@@ -83,6 +83,7 @@
         this.fullName = 'Je bent afgemeld...'
         this.loggedIn = false
         localStorage.removeItem('currentUser')
+        $router.push('Login')
       },
       checkIfOnline () {
        //alert('alertifonline')

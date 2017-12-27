@@ -1,0 +1,22 @@
+/* _-_-_- modules/BUTTONS -_-_-_ */
+.touchFeedback {
+  background-color: $lightgrey;
+}
+
+
+.btn {
+  border-radius: $huge-radius;
+  font-size: $button-font-size;
+  text-transform: capitalize;
+  background-color: $orange;
+}
+
+.btn:hover, .btn-large:hover, btn:active {
+  background-color: $orange;
+}
+
+.extra-button {
+  background-color: $mediumgrey;
+  float: left;
+  margin-right: $small-space;
+}

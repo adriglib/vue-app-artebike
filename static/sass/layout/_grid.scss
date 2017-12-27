@@ -1,0 +1,17 @@
+/* _-_-_- layout/GRID -_-_-_ */
+
+.contentcontainer {
+  height: calc(100vh - 56px);
+}
+
+.content {
+  margin-bottom: $massive-space;
+}
+
+.info-block {
+  padding-top: $padding-large;
+}
+
+.content .row {
+  margin-bottom: 0px;
+}

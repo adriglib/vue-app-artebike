@@ -1,0 +1,10 @@
+.profile-info li:before {
+  content: "\2022"; /* Insert content that looks like bullets */
+  padding-right: 8px;
+  color: $orange; /* Or a color you prefer */
+}
+
+.profile-info {
+  list-style: none;
+}
+

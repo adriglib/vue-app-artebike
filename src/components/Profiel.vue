@@ -17,6 +17,7 @@
             <li>{{ email }}</li>
             <li v-if="rijbewijs">Heeft een rijbewijs</li>
             <li v-else>Heeft geen rijbewijs</li>
+            <li v-if="abonnementDatum">Een jaar geldig vanaf:<br> {{ abonnementDatum }}</li>
           </ul>
         </div>
       </div>
@@ -24,6 +25,7 @@
         <div class="col s10 offset-s1 profile-info">
           <div>
             <h3 class="orange">Reservaties</h3>
+              <p v-if="noReservations">U heeft geen reservaties.</p>
 
               <ul v-for="reservation in reservatiesArray" >
                 <li style="padding-bottom: 20px">
@@ -70,6 +72,8 @@
         reservatiesArray: [],
         locationsArray: [],
         fietsenTypesArray: [],
+        noReservations: false,
+        abonnementDatum: ''
       }
     },
     created () {
@@ -99,7 +103,34 @@
         localStorage.removeItem('currentUser')
       },
       deleteReservation(info) {
-        console.log('test')
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'))
+        let csrf = currentUser.csrf_token
+        let config = {
+          headers: {
+            'X-CSRF-Token': csrf,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          auth: {
+            username: 'cms-user',
+            password: 'secret'
+          },
+        };
+        axios.delete('http://cms.localhost/artebike/reservatie/' + info.id, config).then(() => {
+          console.log('succesvol reservaties verwijderd')
+          this.reservatiesArray = this.reservatiesArray.filter(function (obj) {
+            obj.id != info.id
+          })
+          if(this.reservatiesArray.length == 0){
+            this.noReservations = true;
+          }
+          else {
+            this.noReservations = false;
+          }
+        })
+          .catch(({message: error}) => {
+            console.info(error)
+          })
       },
       checkIfOnline () {
         self = this
@@ -127,6 +158,7 @@
               console.log(users)
               this.fullName = users.field_name[0].value + ' ' + users.field_surname[0].value
               this.rijbewijs = users.field_rijbewijs[0].value
+              this.abonnementDatum = users.field_begin_abonnement[0].value
             })
             .catch(({message: error}) => {
               console.info(error)
@@ -175,7 +207,12 @@
                         this.$set( this.reservatiesArray[i], 'field_longitude', laadstationObject.field_longitude)
                       }
 
-                      console.log(this.reservatiesArray)
+                      if(this.reservatiesArray.length == 0){
+                        this.noReservations = true;
+                      }
+                      else {
+                        this.noReservations = false;
+                      }
                       console.log(this.reservatiesArray)
                     })
                     .catch(({message: error}) => {

@@ -1,0 +1,51 @@
+/*FONTS */
+$playfair: "Playfair Display", Serif;
+$worksans: 'Work Sans', SansSerif;
+
+$small-font-size: 1.1rem;
+$selected-font-size: 1.2rem;
+$text-font-size: 1.3rem;
+$description-font-size: 1rem;
+$button-font-size: 1.3em;
+
+/* COLORS */
+$black: #353535;
+$white: #FFF;
+$orange: #EE9900;
+$lightgrey: rgba(75, 75, 75, 0.05);
+$mediumgrey: rgba(158, 158, 158, 0.45);
+$darkgrey: #9e9e9e;
+
+/* Z_INDEX */
+$level0: 1;
+$level1: 10;
+$level2: 100;
+$level3: 1000;
+$level4: 10000;
+$level5: 100000;
+
+/* MARGIN, PADDING AND SPACING */
+$smaller-space: 5px;
+$medium-smaller-space: 8px;
+$small-space: 10px;
+$normal-space: 15px;
+$large-space: 20px;
+$larger-space: 25px;
+$very-large-space: 35px;
+$huge-space: 50px;
+$massive-space: 65px;
+
+$padding-large: 1.5em;
+
+/*BORDER*/
+$thin-border: 1px;
+$light-border: 2px;
+
+$huge-radius: 50px;
+
+/*WIDTH & HEIGHT*/
+$full-width: 100%;
+$quarter-height: 23vh;
+$full-height: 100vh;
+$full-vw: 100vw
+

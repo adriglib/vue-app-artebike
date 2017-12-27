@@ -1,0 +1,13 @@
+
+.map,
+.map .row {
+  margin: 0;
+  width: $full-width;
+}
+
+.leaflet-routing-alt {
+  width: $full-vw;
+  padding: 0;
+  height: $quarter-height;
+  margin: 0px;
+}
