@@ -19,8 +19,9 @@ export default new Router({
         if(localStorage.getItem('currentUser') == null){
           next('/login')
         }
-        else
+        else{
           next()
+        }
       }
     },
     {

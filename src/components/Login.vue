@@ -49,7 +49,8 @@
           password: 'test'
         },
         currentRoute: '',
-        errors: []
+        errors: [],
+        hasPayed: false
       }
     },
 //    created () {
@@ -66,7 +67,8 @@
 //    },
     methods: {
       loginUser () {
-        self = this
+        let self = this
+
         let config = {
           headers: {
             'Content-Type': 'application/json'
@@ -77,8 +79,7 @@
           {
             "name": this.login.email + '@student.arteveldehs.be',
             "pass": this.login.password
-          }, config)
-          .then(function (response) {
+          }, config).then(function (response) {
             localStorage.setItem( 'currentUser', JSON.stringify(response.data) );
             let currentUser = JSON.parse(localStorage.getItem('currentUser'))
             let csrf = currentUser.csrf_token
@@ -95,18 +96,55 @@
                 password: 'secret'
               },
             };
+
             axios.get(url, config)
               .then(({data:users}) => {
-                console.log(users.field_rijbewijs[0].value)
                 localStorage.setItem( 'hasDrivingLicense', JSON.stringify({"rijbewijs": users.field_rijbewijs[0].value}) );
+                self.checkIfPayed(users.field_begin_abonnement[0].value)
               })
               .catch(({message: error}) => {
                 console.info(error)
               })
             bus.$emit('userLogin', true)
-            self.$router.push('/reserveren')
-          },
-        )
+            self.$router.push('/')
+          })
+
+      },
+
+      checkIfPayed(abonnementDatum) {
+        if(abonnementDatum == null){
+          this.hasPayed = false
+        }
+        else {
+          let date = new Date()
+          let beginSubscription = abonnementDatum
+          let rawEndSubscription = new Date(beginSubscription)
+          let rawEndSubscriptionYear = parseInt(rawEndSubscription.getFullYear() + 1)
+          let rawEndSubscriptionMonth = rawEndSubscription.getMonth()
+          let rawEndSubscriptionDay = rawEndSubscription.getDate()
+          let endSubscription = rawEndSubscriptionYear + '-' + rawEndSubscriptionMonth + '-' + rawEndSubscriptionDay
+          console.log(endSubscription)
+          let currentDay = date.getFullYear() + '-' + parseInt(date.getMonth() + 1) + '-' + date.getDate()
+          if(this.dateCheck(beginSubscription,endSubscription, currentDay))
+            this.hasPayed = true
+          else
+            this.hasPayed = false
+          localStorage.setItem('hasSubscription', this.hasPayed)
+          return this.hasPayed
+        }
+      },
+
+      dateCheck(from,to,check) {
+
+        let fDate,lDate,cDate;
+        fDate = Date.parse(from);
+        lDate = Date.parse(to);
+        cDate = Date.parse(check);
+
+        if((cDate <= lDate && cDate >= fDate)) {
+          return true;
+        }
+        return false;
       },
     }
   }

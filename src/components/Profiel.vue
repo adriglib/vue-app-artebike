@@ -23,7 +23,7 @@
       </div>
       <div class="row">
         <div class="col s10 offset-s1 profile-info">
-          <div>
+          <div v-if="hasPayed">
             <h3 class="orange">Reservaties</h3>
               <p v-if="noReservations">U heeft geen reservaties.</p>
 
@@ -50,6 +50,9 @@
               <!--</div>-->
             <!--</div>-->
           </div>
+          <div v-else>
+            <h3 class="orange">U heeft geen abonnement en kan dus niet reserveren of gebruik maken van de dienst.</h3>
+          </div>
         </div>
       </div>
     </div>
@@ -73,13 +76,15 @@
         locationsArray: [],
         fietsenTypesArray: [],
         noReservations: false,
-        abonnementDatum: ''
+        abonnementDatum: '',
+        hasPayed: false
       }
     },
     created () {
      this.checkIfOnline()
     },
     mounted () {
+      this.checkIfPayed()
       this.checkIfOnline()
 //      let mymap = L.map('mapid').setView([51.061836, 3.712511], 12.45);
 //
@@ -95,12 +100,36 @@
 //    },
     },
     methods: {
+      checkIfPayed() {
+        let moreUserInfo = JSON.parse(localStorage.getItem('hasSubscription'))
+        if(moreUserInfo == null || moreUserInfo == false){
+          this.hasPayed = false
+        }
+        else {
+            this.hasPayed = true
+        }
+      },
+
+      dateCheck(from,to,check) {
+
+      let fDate,lDate,cDate;
+      fDate = Date.parse(from);
+      lDate = Date.parse(to);
+      cDate = Date.parse(check);
+
+      if((cDate <= lDate && cDate >= fDate)) {
+        return true;
+      }
+      return false;
+    },
       addWantedLocationToLocalStorage (info) {
         localStorage.setItem('wantedLocation', JSON.stringify(info))
       },
       logout() {
         bus.$emit('userLogout')
         localStorage.removeItem('currentUser')
+        localStorage.removeItem('hasDrivingLicense')
+        localStorage.removeItem('hasSubscription')
       },
       deleteReservation(info) {
         let currentUser = JSON.parse(localStorage.getItem('currentUser'))

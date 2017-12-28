@@ -54,6 +54,7 @@
 
 <script>
   import axios from 'axios'
+  import router from './../router'
   import { bus } from '../main';
 
   export default {
@@ -83,7 +84,9 @@
         this.fullName = 'Je bent afgemeld...'
         this.loggedIn = false
         localStorage.removeItem('currentUser')
-        $router.push('Login')
+        localStorage.removeItem('hasDrivingLicense')
+        localStorage.removeItem('hasSubscription')
+        this.$router.push('Login')
       },
       checkIfOnline () {
        //alert('alertifonline')
