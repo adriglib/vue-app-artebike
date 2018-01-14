@@ -45,8 +45,8 @@
     data () {
       return {
         login: {
-          email: 'nickboon',
-          password: 'test'
+          email: '',
+          password: ''
         },
         currentRoute: '',
         errors: [],
@@ -81,6 +81,7 @@
             "pass": this.login.password
           }, config).then(function (response) {
             localStorage.setItem( 'currentUser', JSON.stringify(response.data) );
+            localStorage.setItem('passwordInfo', JSON.stringify(btoa(self.login.password)))
             let currentUser = JSON.parse(localStorage.getItem('currentUser'))
             let csrf = currentUser.csrf_token
             let userID = currentUser.current_user.uid
@@ -92,8 +93,8 @@
                 'Content-Type': 'application/json'
               },
               auth: {
-                username: 'cms-user',
-                password: 'secret'
+                username: self.login.email + '@student.arteveldehs.be',
+                password: self.login.password
               },
             };
 
@@ -120,11 +121,11 @@
           let beginSubscription = abonnementDatum
           let rawEndSubscription = new Date(beginSubscription)
           let rawEndSubscriptionYear = parseInt(rawEndSubscription.getFullYear() + 1)
-          let rawEndSubscriptionMonth = rawEndSubscription.getMonth()
+          let rawEndSubscriptionMonth = parseInt(rawEndSubscription.getMonth() + 1)
           let rawEndSubscriptionDay = rawEndSubscription.getDate()
           let endSubscription = rawEndSubscriptionYear + '-' + rawEndSubscriptionMonth + '-' + rawEndSubscriptionDay
-          console.log(endSubscription)
           let currentDay = date.getFullYear() + '-' + parseInt(date.getMonth() + 1) + '-' + date.getDate()
+
           if(this.dateCheck(beginSubscription,endSubscription, currentDay))
             this.hasPayed = true
           else

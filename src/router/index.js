@@ -6,6 +6,7 @@ import Reserveren from '@/components/Reserveren'
 import Login from '@/components/Login'
 import Registreren from '@/components/Registreren'
 import Navigatie from '@/components/Navigatie'
+import WijzigReservatie from '@/components/WijzigReservatie'
 
 Vue.use(Router)
 
@@ -64,6 +65,18 @@ export default new Router({
       path: '/navigatie',
       // name: 'Profiel',
       component: Navigatie,
+      beforeEnter: (to, from, next) => {
+        if(localStorage.getItem('currentUser') == null){
+          next('/login')
+        }
+        else
+          next()
+      }
+    },
+    {
+      path: '/wijzigreservatie/:reservatieId',
+      name: 'wijzigreservatie',
+      component: WijzigReservatie,
       beforeEnter: (to, from, next) => {
         if(localStorage.getItem('currentUser') == null){
           next('/login')

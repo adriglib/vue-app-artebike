@@ -28,7 +28,7 @@
 
          </div>
           <!--<input v-for="date in dates" class="radio-orange white-text" v-model="datum" :value="date.name" name="group1" type="radio" :id="1" />-->
-             <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">Je kan reserveren tussen 06:00u en 23:00u. Opgelet, een uur na het begin van de reservatie moet deze terugstaan in een laadstation naar keuze, als dit niet zo is zal dit gevolgen hebben. Surf naar onze website voor meer informatie.</p>
+             <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">{{ smallDescription }}</p>
              <!--<p class="small-description">{{ foutMelding }}</p>-->
 
         </div>
@@ -91,7 +91,9 @@
         foutMelding: '',
         customDate: '',
         currentRoute: '',
-        noLicense: 'notSelected'
+        noLicense: 'notSelected',
+        inPast: false,
+        smallDescription: 'Je kan reserveren tussen 06:00u en 23:00u. Opgelet, een uur na het begin van de reservatie moet deze terugstaan in een laadstation naar keuze, als dit niet zo is zal dit gevolgen hebben. Surf naar onze website voor meer informatie.'
       }
     },
     created () {
@@ -195,6 +197,7 @@
       },
 
       updateAvailibilityAccordingToTimeAndDate () {
+        let self = this
         let date = new Date()
         let day
 
@@ -202,14 +205,29 @@
         this.selectedTime = $('.timepicker').val()
         if (this.selectedDate == 'Vandaag') {
           day = date.getDate()
+          // Controleer of het niet in het verleden is
+          let currentTime = date.getHours().toString() + date.getMinutes().toString()
+          let selectedTime = (this.selectedTime.split(':')[0]).toString() + (this.selectedTime.split(':')[1]).toString()
+          console.log(parseInt(selectedTime), parseInt(currentTime))
+          if(parseInt(selectedTime) <= parseInt(currentTime)){
+            self.smallDescription = 'Je kan niet in het verleden een reservering maken'
+            self.inPast = true
+          }
+          else {
+            self.smallDescription = 'Een uur na de reservatie moet je fiets terugstaan in een laadstation naar keuze.'
+            self.inPast = false
+          }
         }
         else if (this.selectedDate == 'Morgen') {
           day = date.getDate() + 1
         }
 
+
+
         if (this.selectedTime.split(':')[0] < 6 || this.selectedTime.split(':')[0] >= 23){
           this.customDate = '';
           this.foutMelding = 'Je kan niet reserveren voor 6u of na 23u.'
+          this.smallDescription =  'Je kan reserveren tussen 06:00u en 23:00u. Opgelet, een uur na het begin van de reservatie moet deze terugstaan in een laadstation naar keuze, als dit niet zo is zal dit gevolgen hebben. Surf naar onze website voor meer informatie.'
         }
         else{
           this.customDate = date.getFullYear() + '-' + str_pad(date.getMonth() + 1) + '-' + str_pad(day) + 'T' + $('.timepicker').val() + ':00';
@@ -217,7 +235,6 @@
         function str_pad(n) {
           return String("0" + n).slice(-2);
         }
-//alert('2017-12-14T17:41:00')
 
 
         for ( let i = 0; i < this.locationsArray.length; i++ ) {
@@ -275,6 +292,7 @@
         let csrf = currentUser.csrf_token
         let userID = currentUser.current_user.uid
         let userName = currentUser.current_user.name
+        let password = atob(JSON.parse(localStorage.getItem('passwordInfo')))
 
         let IDFromSelectedBike = this.fietsenArray.filter(function( obj ) {
           return (obj.field_fietssoort == self.fietsenTypeID && obj.field_beschikbaarheid == 'True' && obj.name_1 == self.pickedLocation.name);
@@ -286,6 +304,9 @@
             'Accept': 'application/json',
             'Content-Type': 'application/json'
           },
+          // Normaal gezien kan je hier ook met userName en password authenticaten maar Drupal zegt dat hij geen
+          // toegang heeft, er is bij de user roles permission GEEN optie om Create Reservations toe te laten,
+          // dit is er wel voor andere entities?! Denk dat het aan drupal ligt? Gaat wel als je als admin bent ingelogd.
           auth: {
             username: 'cms-user',
             password: 'secret'
@@ -294,7 +315,7 @@
         self=this;
         if(this.noLicense == false && this.noLicense != 'notSelected'){
           if(this.pickedLocation != ''){
-            if(this.selectedTime != ''){
+            if(this.selectedTime != ''  && this.inPast == false){
               axios.post(`http://cms.localhost/entity/reservatie`,
                 {
                   "field_fietstype": [
@@ -347,13 +368,13 @@
                 })
             }
             else
-              alert('You have to select a time!')
+              self.foutMelding = 'Je moet een geldige tijd selecteren!'
           }
           else
-            alert('You have to select a location!')
+            self.foutMelding = 'Je moet een laadstation selecteren waar je een fiets kan ophalen!'
         }
         else{
-          alert('You have to select a (valid) biketype!')
+          self.foutMelding = 'Je moet een geldig fietstype selecteren!'
         }
       },
       }

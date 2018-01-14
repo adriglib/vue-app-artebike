@@ -17,7 +17,7 @@
             <li>{{ email }}</li>
             <li v-if="rijbewijs">Heeft een rijbewijs</li>
             <li v-else>Heeft geen rijbewijs</li>
-            <li v-if="abonnementDatum">Een jaar geldig vanaf:<br> {{ abonnementDatum }}</li>
+            <li v-if="abonnementDatum">Aanvang abonnement:<br> {{ abonnementDatum }}, een fiets reserveren kan na activatie, dit gebeurt automatisch de dag na aanvang van het abonnement. </li>
           </ul>
         </div>
       </div>
@@ -36,22 +36,16 @@
                   <i class="material-icons">navigation</i>
                 </router-link></span>
                 <span @click="deleteReservation(reservation)" class="extra-button-div"><a href="#" class="col s3 offset-l btn waves-effect waves-light extra-button" type="submit" name="action">
-                  <i class="material-icons">delete</i>
-                </a></span>
-                <span class="extra-button-div"><a href="#" class="col s3 offset-l btn waves-effect waves-light extra-button" type="submit" name="action">
                   <i class="material-icons">check</i>
                 </a></span>
+                <span class="extra-button-div"><router-link class="col s3 offset-l btn waves-effect waves-light extra-button" :to="{ name: 'wijzigreservatie', params: {reservatieId: reservation.id } }" type="submit" name="action">
+                  <i class="material-icons">edit</i>
+                </router-link></span>
                 <br>
               </ul>
-
-            <!--<div class="map">-->
-              <!--<div class="row col s12" id="mapid" style="height: 40vh">-->
-
-              <!--</div>-->
-            <!--</div>-->
           </div>
           <div v-else>
-            <h3 class="orange">U heeft geen abonnement en kan dus niet reserveren of gebruik maken van de dienst.</h3>
+            <h3 class="orange">Uw abonnement is niet geactiveerd en u kan dus niet reserveren of gebruik maken van de dienst.</h3>
           </div>
         </div>
       </div>
@@ -128,12 +122,15 @@
       logout() {
         bus.$emit('userLogout')
         localStorage.removeItem('currentUser')
+        localStorage.removeItem('passwordInfo')
         localStorage.removeItem('hasDrivingLicense')
         localStorage.removeItem('hasSubscription')
       },
       deleteReservation(info) {
         let currentUser = JSON.parse(localStorage.getItem('currentUser'))
+        let password = atob(JSON.parse(localStorage.getItem('passwordInfo')))
         let csrf = currentUser.csrf_token
+        let userName = currentUser.current_user.name
         let config = {
           headers: {
             'X-CSRF-Token': csrf,
@@ -141,8 +138,8 @@
             'Content-Type': 'application/json'
           },
           auth: {
-            username: 'cms-user',
-            password: 'secret'
+            username: userName,
+            password: password
           },
         };
         axios.delete('http://cms.localhost/artebike/reservatie/' + info.id, config).then(() => {
@@ -187,7 +184,49 @@
               console.log(users)
               this.fullName = users.field_name[0].value + ' ' + users.field_surname[0].value
               this.rijbewijs = users.field_rijbewijs[0].value
-              this.abonnementDatum = users.field_begin_abonnement[0].value
+              let rawAbonnementDatum = users.field_begin_abonnement[0].value
+              let rawAbonnementDatumArray = users.field_begin_abonnement[0].value.split("-")
+
+              let monthInDutch;
+              switch(rawAbonnementDatumArray[1]){
+                case '01':
+                  monthInDutch = 'januari'
+                  break;
+                case '02':
+                  monthInDutch = 'februari'
+                  break;
+                case '03':
+                  monthInDutch = 'maart'
+                  break;
+                case '04':
+                  monthInDutch = 'april'
+                  break;
+                case '05':
+                  monthInDutch = 'mei'
+                  break;
+                case '06':
+                  monthInDutch = 'juni'
+                  break;
+                case '07':
+                  monthInDutch = 'juli'
+                  break;
+                case '08':
+                  monthInDutch = 'augustus'
+                  break;
+                case '09':
+                  monthInDutch = 'september'
+                  break;
+                case '10':
+                  monthInDutch = 'oktober'
+                  break;
+                case '11':
+                  monthInDutch = 'november'
+                  break;
+                case '12':
+                  monthInDutch = 'december'
+                  break;
+              }
+              this.abonnementDatum = rawAbonnementDatumArray[2] + ' ' + monthInDutch + ' ' + rawAbonnementDatumArray[0]
             })
             .catch(({message: error}) => {
               console.info(error)

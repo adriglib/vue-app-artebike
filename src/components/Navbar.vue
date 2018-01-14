@@ -84,6 +84,7 @@
         this.fullName = 'Je bent afgemeld...'
         this.loggedIn = false
         localStorage.removeItem('currentUser')
+        localStorage.removeItem('passwordInfo')
         localStorage.removeItem('hasDrivingLicense')
         localStorage.removeItem('hasSubscription')
         this.$router.push('Login')
@@ -97,6 +98,9 @@
         else {
           this.loggedIn = true
           let currentUser = JSON.parse(localStorage.getItem('currentUser'))
+          let password = atob(JSON.parse(localStorage.getItem('passwordInfo')))
+          let userName = currentUser.current_user.name
+
           this.email = currentUser.current_user.name
           let userID = currentUser.current_user.uid
           let csrf = currentUser.csrf_token
@@ -109,8 +113,8 @@
               'Content-Type': 'application/json'
             },
             auth: {
-              username: 'cms-user',
-              password: 'secret'
+              username: userName,
+              password: password
             },
           };
 
