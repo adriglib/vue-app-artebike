@@ -1,6 +1,5 @@
 <template>
   <div class="contentcontainer">
-    <!-- Page Content goes here -->
     <div class="content" >
       <div class="row bikes">
         <span class="center-align"><h5 class="orange">Selecteer een type fiets: </h5></span>
@@ -25,12 +24,8 @@
 
          <div @click="updateAvailibilityAccordingToTimeAndDate">
            <input id="selectedTime" v-model="selectedTime" :value="selectedTime" placeholder="Kies een tijdstip" type="text" class="timepicker col s12">
-
          </div>
-          <!--<input v-for="date in dates" class="radio-orange white-text" v-model="datum" :value="date.name" name="group1" type="radio" :id="1" />-->
-             <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">{{ smallDescription }}</p>
-             <!--<p class="small-description">{{ foutMelding }}</p>-->
-
+          <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">{{ smallDescription }}</p>
         </div>
       </div>
       <div class="row">
@@ -47,7 +42,7 @@
             <tr class=""  v-for="location in locationsArray">
               <td>
                 <input class="radio-orange" v-model="pickedLocation" :value="location" name="group1" type="radio" :id="location.name" />
-                <label class="" :for="location.name">{{ location.name}}</label>
+                <label class="" :for="location.name">{{ location.name }}</label>
               </td>
               <td v-if='pedelecSelected' class="center-align">{{ location.availablePedelecs }}</td>
               <td v-if='ebikeSelected' class="center-align">{{ location.availableEbikes }}</td>
@@ -98,6 +93,7 @@ export default {
     };
   },
   created() {
+    // Initialize timepicker.
     $(document).ready(function() {
       $("select").material_select();
       $(".timepicker").pickatime({
@@ -108,12 +104,11 @@ export default {
         cleartext: "Verwijder", // text for clear-button
         canceltext: "Annuleer", // Text for cancel-button
         autoclose: false, // automatic close timepicker,
-        afterShow: function() {
-          console.log("tetsikhz:jd");
-        }
+        afterShow: function() {}
       });
     });
 
+    // First get the locations so they can be showed in list.
     axios
       .get("http://cms.localhost/api/locations")
       .then(({ data: locations }) => {
@@ -122,26 +117,32 @@ export default {
           "Alles wat je ontvangt van locations API",
           this.locationsArray
         );
+        // Then get the biketypes so they can be showed.
         axios
           .get("http://cms.localhost/api/biketypes")
           .then(({ data: fietsen }) => {
             this.fietsenTypesArray = fietsen;
-            console.log("fietsentypeArray!!!!", this.fietsenTypesArray);
+            console.log(
+              "Alles wat je ontvangt van biketypes API",
+              this.fietsenTypesArray
+            );
+            // Then get the bikes so the availble number can be updated. (We need location and biketype info)
             axios
               .get("http://cms.localhost/api/fietsen?_format=json")
               .then(({ data: fietsen }) => {
                 self = this;
                 this.fietsenArray = fietsen;
-
-                console.log("Alle fietsen", fietsen);
-
+                console.log("Alles wat je ontvangt van fietsen API", fietsen);
+                // Only get bikes that are available.
                 for (let i = 0; i < this.locationsArray.length; i++) {
+                  // Get all bikes
                   let availableBikes = this.fietsenArray.filter(function(obj) {
                     return (
                       obj.name_1 == self.locationsArray[i].name &&
                       obj.field_beschikbaarheid == "True"
                     );
                   });
+                  // Get pedelecs
                   let availablePedelecs = this.fietsenArray.filter(function(
                     obj
                   ) {
@@ -151,6 +152,7 @@ export default {
                       obj.field_fietssoort == "1"
                     );
                   });
+                  // Get ebikes
                   let availableEbikes = this.fietsenArray.filter(function(obj) {
                     return (
                       obj.name_1 == self.locationsArray[i].name &&
@@ -158,6 +160,7 @@ export default {
                       obj.field_fietssoort == "2"
                     );
                   });
+                  // Write available bikes in array, then get lenght --> number of available.
                   this.$set(
                     this.locationsArray[i],
                     "availableBikes",
@@ -174,7 +177,6 @@ export default {
                     availableEbikes.length.toString()
                   );
                 }
-                console.log(this.locationsArray);
               })
               .catch(({ message: error }) => {
                 console.info(error);
@@ -189,8 +191,7 @@ export default {
       });
   },
   methods: {
-    mounted() {},
-
+    // Select a biketype
     selectType(fietssoort) {
       let self = this;
       let pedelec = document.querySelector(".Pedelec");
@@ -201,12 +202,13 @@ export default {
       if (fietssoort.id[0].value == "1") {
         this.ebikeSelected = false;
         this.pedelecSelected = true;
+        // Check if user has a driver license
         let rijbewijsObject = JSON.parse(
           localStorage.getItem("hasDrivingLicense")
         );
-
-        console.log(rijbewijsObject.rijbewijs);
+        // If a driver license, you can select a pedelec.
         if (rijbewijsObject.rijbewijs == true) {
+          // Add grey background when selected.
           ebike.classList.remove("touchFeedback");
           pedelec.classList.add("touchFeedback");
           self.noLicense = false;
@@ -221,25 +223,27 @@ export default {
         self.noLicense = false;
       }
     },
-
+    // Update the available bikes according to the time, type and date.
     updateAvailibilityAccordingToTimeAndDate() {
       let self = this;
       let date = new Date();
       let day;
-
+      // Get selected date.
       this.selectedDate = $("#selectedDate")
         .parent(["0"])
         .children()[1].value;
+      // Get selected time.
       this.selectedTime = $(".timepicker").val();
+      // If it is today, check the current time and selected time.
+      // Can't be in the past.
       if (this.selectedDate == "Vandaag") {
         day = date.getDate();
-        // Controleer of het niet in het verleden is
+        // Check if not in the past.
         let currentTime =
           date.getHours().toString() + date.getMinutes().toString();
         let selectedTime =
           this.selectedTime.split(":")[0].toString() +
           this.selectedTime.split(":")[1].toString();
-        console.log(parseInt(selectedTime), parseInt(currentTime));
         if (parseInt(selectedTime) <= parseInt(currentTime)) {
           self.smallDescription =
             "Je kan niet in het verleden een reservering maken";
@@ -252,7 +256,7 @@ export default {
       } else if (this.selectedDate == "Morgen") {
         day = date.getDate() + 1;
       }
-
+      // Make sure a reservation is not before 6 o'clock and not after 11 o'clock.
       if (
         this.selectedTime.split(":")[0] < 6 ||
         this.selectedTime.split(":")[0] >= 23
@@ -262,6 +266,7 @@ export default {
         this.smallDescription =
           "Je kan reserveren tussen 06:00u en 23:00u. Opgelet, een uur na het begin van de reservatie moet deze terugstaan in een laadstation naar keuze, als dit niet zo is zal dit gevolgen hebben. Surf naar onze website voor meer informatie.";
       } else {
+        // If this is not the case: set the date and time.
         this.customDate =
           date.getFullYear() +
           "-" +
@@ -272,20 +277,28 @@ export default {
           $(".timepicker").val() +
           ":00";
       }
+      // Add a zero before the date or month if it is 1 digit.
       function str_pad(n) {
         return String("0" + n).slice(-2);
       }
-
+      // Check the availibility for every location.
       for (let i = 0; i < this.locationsArray.length; i++) {
+        // Get available bikes.
         let availableBikes = this.fietsenArray.filter(function(obj) {
+          // Check if it has info about a date where it is not available.
           if (obj.field_datum_bezet != false) {
+            // The time it is not available.
             let timeObject = obj.field_datum_bezet
               .substr(-8, 5)
               .replace(":", "");
+            // The time you selected.
             let timeInput = self.customDate.substr(-8, 5).replace(":", "");
+            // The date it is not available.
             let dateObject = obj.field_datum_bezet.substr(0, 10);
+            // The date you selected.
             let dateInput = self.customDate.substr(0, 10);
 
+            // Only return bikes that are not an hour before or an hour after the reservation on the specific date.
             return (
               obj.name_1 == self.locationsArray[i].name &&
               obj.field_beschikbaarheid == "True" &&
@@ -295,8 +308,9 @@ export default {
               ) ||
                 dateObject != dateInput)
             );
-          } else return obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == "True" && obj.field_fietssoort == "2";
+          } else return obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == "True";
         });
+        // Filter for available pedelecs
         let availablePedelecs = this.fietsenArray.filter(function(obj) {
           if (obj.field_datum_bezet != false) {
             let timeObject = obj.field_datum_bezet
@@ -305,7 +319,7 @@ export default {
             let timeInput = self.customDate.substr(-8, 5).replace(":", "");
             let dateObject = obj.field_datum_bezet.substr(0, 10);
             let dateInput = self.customDate.substr(0, 10);
-
+            // Only return pedelecs that are not an hour before or an hour after the reservation on the specific date.
             return (
               obj.name_1 == self.locationsArray[i].name &&
               obj.field_beschikbaarheid == "True" &&
@@ -318,6 +332,7 @@ export default {
             );
           } else return obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == "True" && obj.field_fietssoort == "1";
         });
+        // Filter ebikes
         let availableEbikes = this.fietsenArray.filter(function(obj) {
           if (obj.field_datum_bezet != false) {
             let timeObject = obj.field_datum_bezet
@@ -326,7 +341,7 @@ export default {
             let timeInput = self.customDate.substr(-8, 5).replace(":", "");
             let dateObject = obj.field_datum_bezet.substr(0, 10);
             let dateInput = self.customDate.substr(0, 10);
-
+            // Only return ebikes that are not an hour before or an hour after the reservation on the specific date.
             return (
               obj.name_1 == self.locationsArray[i].name &&
               obj.field_beschikbaarheid == "True" &&
@@ -339,6 +354,7 @@ export default {
             );
           } else return obj.name_1 == self.locationsArray[i].name && obj.field_beschikbaarheid == "True" && obj.field_fietssoort == "2";
         });
+        // Update the array --> update the number of available bikes.
         this.$set(
           this.locationsArray[i],
           "availableBikes",
@@ -357,15 +373,17 @@ export default {
       }
       console.log(this.locationsArray);
     },
-
+    // Make a reservation.
     makeReservation() {
       let currentUser = JSON.parse(localStorage.getItem("currentUser"));
       let csrf = currentUser.csrf_token;
       let userID = currentUser.current_user.uid;
       let userName = currentUser.current_user.name;
+      // Unhash the password.
       let password = atob(JSON.parse(localStorage.getItem("passwordInfo")));
-
+      // Change a bike so we can change it's availibility.
       let IDFromSelectedBike = this.fietsenArray.filter(function(obj) {
+        // Is has to be the right type, has to be available and on the right location.
         return (
           obj.field_fietssoort == self.fietsenTypeID &&
           obj.field_beschikbaarheid == "True" &&
@@ -388,8 +406,12 @@ export default {
         }
       };
       self = this;
+      // Validation for input fields.
+      // Right biketype?
       if (this.noLicense == false && this.noLicense != "notSelected") {
+        // Picked a location?
         if (this.pickedLocation != "") {
+          // Picked a valid time?
           if (this.selectedTime != "" && this.inPast == false) {
             axios
               .post(
@@ -404,6 +426,7 @@ export default {
                         self.fietsenTypeID
                     }
                   ],
+                  // Date and hour when it will not be available.
                   field_datum: [
                     {
                       value: self.customDate
@@ -431,10 +454,12 @@ export default {
               )
               .then(function(response) {
                 self.$router.push("/profiel");
+                // Update a bike.
                 axios
                   .patch(
                     `http://cms.localhost/artebike/fiets/` +
                       IDFromSelectedBike[0].id,
+                    // Date and hour when it will not be available.
                     {
                       field_datum_bezet: {
                         value: self.customDate

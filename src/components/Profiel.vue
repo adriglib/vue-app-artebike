@@ -1,13 +1,12 @@
 <template>
   <div class="contentcontainer">
-    <!-- Page Content goes here -->
     <div class="content" >
       <div class="row">
         <div class="info-block">
           <h3 class="orange col s10 offset-s1 center-align">{{ fullName }}</h3>
         </div>
         <div @click="logout"><router-link to="login" class="col s6 offset-s3 btn waves-effect waves-light" type="submit" name="action">
-          Logout
+          Sign out
         </router-link></div>
       </div>
       <div class="row">
@@ -54,6 +53,8 @@
 
 <script>
 import axios from "axios";
+// Import a bus component to pass methodes over other components.
+// We use this to edit the Menu navigation.
 import { bus } from "../main";
 
 export default {
@@ -81,6 +82,7 @@ export default {
     this.checkIfOnline();
   },
   methods: {
+    // Get localStorage info (created on login) if the user has a subscription.
     checkIfPayed() {
       let moreUserInfo = JSON.parse(localStorage.getItem("hasSubscription"));
       if (moreUserInfo == null || moreUserInfo == false) {
@@ -89,21 +91,13 @@ export default {
         this.hasPayed = true;
       }
     },
-
-    dateCheck(from, to, check) {
-      let fDate, lDate, cDate;
-      fDate = Date.parse(from);
-      lDate = Date.parse(to);
-      cDate = Date.parse(check);
-
-      if (cDate <= lDate && cDate >= fDate) {
-        return true;
-      }
-      return false;
-    },
+    // Add the location you want to navigate to in localStorage.
+    // Could use navigation props (used this when editing reservation)
+    // but writing and getting from localStorage goes faster.
     addWantedLocationToLocalStorage(info) {
       localStorage.setItem("wantedLocation", JSON.stringify(info));
     },
+    // Signs out the user, let menu know and remove localStorage.
     logout() {
       bus.$emit("userLogout");
       localStorage.removeItem("currentUser");
@@ -111,6 +105,7 @@ export default {
       localStorage.removeItem("hasDrivingLicense");
       localStorage.removeItem("hasSubscription");
     },
+    // Delete reservation.
     deleteReservation(info) {
       let currentUser = JSON.parse(localStorage.getItem("currentUser"));
       let password = atob(JSON.parse(localStorage.getItem("passwordInfo")));
@@ -122,6 +117,7 @@ export default {
           Accept: "application/json",
           "Content-Type": "application/json"
         },
+        // Authorization by current user.
         auth: {
           username: userName,
           password: password
@@ -130,10 +126,11 @@ export default {
       axios
         .delete("http://cms.localhost/artebike/reservatie/" + info.id, config)
         .then(() => {
-          console.log("succesvol reservaties verwijderd");
+          // Reservation succesfully removes.
           this.reservatiesArray = this.reservatiesArray.filter(function(obj) {
             obj.id != info.id;
           });
+          // Check if there are other reservations, otherwise show 'No reservations'.
           if (this.reservatiesArray.length == 0) {
             this.noReservations = true;
           } else {
@@ -144,11 +141,13 @@ export default {
           console.info(error);
         });
     },
+    // Check if user is signed in en get user info.
     checkIfOnline() {
       self = this;
       let currentUser = JSON.parse(localStorage.getItem("currentUser"));
       this.email = currentUser.current_user.name;
-
+      let userName = currentUser.current_user.name;
+      let password = atob(JSON.parse(localStorage.getItem("passwordInfo")));
       let userID = currentUser.current_user.uid;
       let csrf = currentUser.csrf_token;
       let url = "http://cms.localhost/user/" + userID + "?_format=json";
@@ -159,16 +158,17 @@ export default {
           Accept: "application/json",
           "Content-Type": "application/json"
         },
+        // Current user authenticates itself.
         auth: {
-          username: "cms-user",
-          password: "secret"
+          username: userName,
+          password: password
         }
       };
-
+      // Get all user info.
       axios
         .get(url, config)
         .then(({ data: users }) => {
-          console.log(users);
+          // Get info: name, drivers license and subscription date.
           this.fullName =
             users.field_name[0].value + " " + users.field_surname[0].value;
           this.rijbewijs = users.field_rijbewijs[0].value;
@@ -178,6 +178,7 @@ export default {
           );
 
           let monthInDutch;
+          // Translate the raw date in readable format.
           switch (rawAbonnementDatumArray[1]) {
             case "01":
               monthInDutch = "januari";
@@ -226,7 +227,8 @@ export default {
         .catch(({ message: error }) => {
           console.info(error);
         });
-
+      // First get the location, the biketypes and then reservations.
+      // We need locations and biketypes to make a readable sentence and assign a name to an id.
       axios
         .get("http://cms.localhost/api/locations")
         .then(({ data: locations }) => {
@@ -248,9 +250,11 @@ export default {
                       return obj.field_user == self.email;
                     }
                   );
-
+                  // Get all reservations of the current user.
+                  // Past reservations are not included because Rest export filter in Drupal.
                   this.reservatiesArray = reservationOfCurrentUser;
 
+                  // Get the biketype, location and date for every reservation.
                   for (let i = 0; i < reservationOfCurrentUser.length; i++) {
                     let fietstype = reservationOfCurrentUser[i].field_fietstype;
                     let fietstypeObject = this.fietsenTypesArray.find(function(
@@ -266,14 +270,15 @@ export default {
                     ) {
                       return obj.id == laadstation;
                     });
-
+                    // Format the date.
                     let datumInfo = reservationOfCurrentUser[
                       i
                     ].field_datum.split(" ");
                     let correcteUur = datumInfo[0].split(":")[0] - 1;
                     let correcteMinuut = datumInfo[0].split(":")[1];
                     let uurEnMinuut = correcteUur + ":" + correcteMinuut;
-
+                    // Update the info in the array from id's and raw dates to readable data.
+                    // Also set coordinates so we can pass it to navigation.
                     this.$set(
                       this.reservatiesArray[i],
                       "field_fietstype",
@@ -305,13 +310,12 @@ export default {
                       laadstationObject.field_longitude
                     );
                   }
-
+                  // If there are no reservations show 'No reservations'.
                   if (this.reservatiesArray.length == 0) {
                     this.noReservations = true;
                   } else {
                     this.noReservations = false;
                   }
-                  console.log(this.reservatiesArray);
                 })
                 .catch(({ message: error }) => {
                   console.info(error);

@@ -1,6 +1,5 @@
 <template>
   <div class="contentcontainer">
-    <!-- Page Content goes here -->
     <div class="content" >
       <div class="row">
         <div class="info-block col s10 offset-s1">
@@ -38,12 +37,8 @@
 
               <div @click="updateAvailibilityAccordingToTimeAndDate">
                 <input id="selectedTime" v-model="selectedTime" :value="selectedTime" placeholder="Kies een tijdstip" type="text" class="timepicker col s12">
-
               </div>
-              <!--<input v-for="date in dates" class="radio-orange white-text" v-model="datum" :value="date.name" name="group1" type="radio" :id="1" />-->
               <p  v-on:click="updateAvailibilityAccordingToTimeAndDate" class="small-description">{{ smallDescription }}</p>
-              <!--<p class="small-description">{{ foutMelding }}</p>-->
-
             </div>
           </div>
           <div class="row">
@@ -57,10 +52,10 @@
                 </thead>
 
                 <tbody>
-                <tr class=""  v-for="location in locationsArray">
+                <tr  v-for="location in locationsArray">
                   <td>
                     <input class="radio-orange" v-model="pickedLocation" :value="location" name="group1" type="radio" :id="location.name" />
-                    <label class="" :for="location.name">{{ location.name}}</label>
+                    <label  :for="location.name">{{ location.name}}</label>
                   </td>
                   <td v-if='pedelecSelected' class="center-align">{{ location.availablePedelecs }}</td>
                   <td v-if='ebikeSelected' class="center-align">{{ location.availableEbikes }}</td>
@@ -83,7 +78,6 @@
 
 <script>
 import axios from "axios";
-import { bus } from "../main";
 
 export default {
   name: "profiel",
@@ -111,6 +105,7 @@ export default {
     };
   },
   created() {
+    // Initialize timepicker.
     $(document).ready(function() {
       $("select").material_select();
       $(".timepicker").pickatime({
@@ -121,16 +116,16 @@ export default {
         cleartext: "Verwijder", // text for clear-button
         canceltext: "Annuleer", // Text for cancel-button
         autoclose: false, // automatic close timepicker,
-        afterShow: function() {
-          console.log("tetsikhz:jd");
-        }
+        afterShow: function() {}
       });
     });
 
     this.checkIfOnline();
+    // Get the ID from the url so the right reservation is being edited.
     this.id = this.$route.params.reservatieId;
   },
   mounted() {
+    // Make sure a user is online and get user info for authentication.
     this.checkIfOnline();
   },
   methods: {
@@ -138,6 +133,7 @@ export default {
       self = this;
       let currentUser = JSON.parse(localStorage.getItem("currentUser"));
       let userName = currentUser.current_user.name;
+      // Unhash password.
       let password = atob(JSON.parse(localStorage.getItem("passwordInfo")));
       this.email = currentUser.current_user.name;
 
@@ -151,67 +147,57 @@ export default {
           Accept: "application/json",
           "Content-Type": "application/json"
         },
+        // Authorization by current user.
         auth: {
           username: userName,
           password: password
         }
       };
-
-      axios
-        .get(url, config)
-        .then(({ data: users }) => {
-          this.fullName =
-            users.field_name[0].value + " " + users.field_surname[0].value;
-          this.rijbewijs = users.field_rijbewijs[0].value;
-        })
-        .catch(({ message: error }) => {
-          console.info(error);
-        });
-
+      // First get the locations so they can be showed in list.
       axios
         .get("http://cms.localhost/api/locations")
         .then(({ data: locations }) => {
           this.locationsArray = locations;
-          //console.log('locations API', this.locationsArray)
+          console.log("locations API", this.locationsArray);
+          // Then get the biketypes so they can be showed.
           axios
             .get("http://cms.localhost/api/biketypes")
             .then(({ data: fietsen }) => {
               this.fietsenTypesArray = fietsen;
               console.log("fietsenTypes API", this.fietsenTypesArray);
+              // Then get the reservations so the correct reservation can be updated. (We need location and biketype info)
               axios
                 .get("http://cms.localhost/api/reservaties")
                 .then(({ data: reservaties }) => {
                   self = this;
                   this.rawReservatiesArray = reservaties;
-                  // console.log('reservations API',this.rawReservatiesArray)
                   let reservationOfCurrentUser = this.rawReservatiesArray.filter(
                     function(obj) {
                       return obj.field_user == self.email && obj.id == self.id;
                     }
                   );
-
-                  console.log(reservationOfCurrentUser);
+                  // Get the relevant reservation (will be show on top).
                   this.reservatie = reservationOfCurrentUser[0];
-
+                  // Get it's biketype.
                   let fietstype = this.reservatie.field_fietstype;
                   let fietstypeObject = this.fietsenTypesArray.find(function(
                     obj
                   ) {
                     return obj.id[0].value == fietstype;
                   });
-                  //
+                  // Get it's location.
                   let laadstation = this.reservatie.field_laadstation;
                   let laadstationObject = this.locationsArray.find(function(
                     obj
                   ) {
                     return obj.id == laadstation;
                   });
-
+                  // Get it's date and time.
                   let datumInfo = this.reservatie.field_datum.split(" ");
                   let correcteUur = datumInfo[0].split(":")[0] - 1;
                   let correcteMinuut = datumInfo[0].split(":")[1];
                   let uurEnMinuut = correcteUur + ":" + correcteMinuut;
-
+                  // Set the type, location, date and time so it can be readable.
                   this.$set(
                     this.reservatie,
                     "field_fietstype",
@@ -240,14 +226,13 @@ export default {
                 .catch(({ message: error }) => {
                   console.info(error);
                 });
+              // Then get the available bikes.
               axios
                 .get("http://cms.localhost/api/fietsen?_format=json")
                 .then(({ data: fietsen }) => {
                   self = this;
                   this.fietsenArray = fietsen;
-
-                  console.log("Alle fietsen", fietsen);
-
+                  // For each location checking the available bikes.
                   for (let i = 0; i < this.locationsArray.length; i++) {
                     let availableBikes = this.fietsenArray.filter(function(
                       obj
@@ -257,6 +242,7 @@ export default {
                         obj.field_beschikbaarheid == "True"
                       );
                     });
+                    // Available pedelecs.
                     let availablePedelecs = this.fietsenArray.filter(function(
                       obj
                     ) {
@@ -266,6 +252,7 @@ export default {
                         obj.field_fietssoort == "1"
                       );
                     });
+                    // Availbe Ebikes.
                     let availableEbikes = this.fietsenArray.filter(function(
                       obj
                     ) {
@@ -305,13 +292,15 @@ export default {
           console.info(error);
         });
     },
+    // Method to select a biketype.
     selectType(fietssoort) {
       let self = this;
       let pedelec = document.querySelector(".Pedelec");
       let ebike = document.querySelector(".E-bike");
 
       this.fietsenTypeID = fietssoort.id[0].value;
-
+      // Make sure the user has a drivers license.
+      // Without a license the user can't use a pedelec.
       if (fietssoort.id[0].value == "1") {
         this.ebikeSelected = false;
         this.pedelecSelected = true;
@@ -319,7 +308,6 @@ export default {
           localStorage.getItem("hasDrivingLicense")
         );
 
-        console.log(rijbewijsObject.rijbewijs);
         if (rijbewijsObject.rijbewijs == true) {
           ebike.classList.remove("touchFeedback");
           pedelec.classList.add("touchFeedback");
@@ -335,6 +323,7 @@ export default {
         self.noLicense = false;
       }
     },
+    // Update the availibility.
     updateAvailibilityAccordingToTimeAndDate() {
       let self = this;
       let date = new Date();
@@ -346,7 +335,7 @@ export default {
       this.selectedTime = $(".timepicker").val();
       if (this.selectedDate == "Vandaag") {
         day = date.getDate();
-        // Controleer of het niet in het verleden is
+        // Check if not in past.
         let currentTime =
           date.getHours().toString() + date.getMinutes().toString();
         let selectedTime =
@@ -365,7 +354,7 @@ export default {
       } else if (this.selectedDate == "Morgen") {
         day = date.getDate() + 1;
       }
-
+      // Not before 6 a.m. and not after 11 p.m.
       if (
         this.selectedTime.split(":")[0] < 6 ||
         this.selectedTime.split(":")[0] >= 23
@@ -500,6 +489,7 @@ export default {
         }
       };
       self = this;
+      // Edit the reservation!
       if (this.noLicense == false && this.noLicense != "notSelected") {
         if (this.pickedLocation != "") {
           if (this.selectedTime != "" && this.inPast == false) {
@@ -543,6 +533,7 @@ export default {
               )
               .then(function(response) {
                 self.$router.push("/profiel");
+                // Also edit the bike.
                 axios
                   .patch(
                     `http://cms.localhost/artebike/fiets/` +

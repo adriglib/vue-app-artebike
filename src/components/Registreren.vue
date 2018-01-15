@@ -1,6 +1,5 @@
 <template>
-  <div class="contentcontainer valign-wrapper" >
-    <!-- Page Content goes here -->
+  <div class="contentcontainer valign-wrapper" > 
     <div class="content align-center">
       <div class="info-block center-align row">
         <h1>Registreren</h1>
@@ -78,6 +77,7 @@ export default {
     };
   },
   methods: {
+    // Adding a user.
     addUser() {
       let config = {
         headers: {
@@ -85,11 +85,13 @@ export default {
           Accept: "application/json",
           "Content-Type": "application/json"
         },
+        // Authentication by administrator.
         auth: {
           username: "cms-user",
           password: "secret"
         }
       };
+      // Validation before commiting post.
       if (
         this.password == this.passwordConfirm &&
         this.name != null &&
@@ -101,6 +103,7 @@ export default {
           .post(
             `http://cms.localhost/entity/user`,
             {
+              // Name is same as email.
               name: [
                 {
                   value: this.email + "@student.arteveldehs.be"
@@ -140,10 +143,12 @@ export default {
             config
           )
           .catch(e => {
+            // Visually show if the registration has failed.
             this.successFeedback =
               "Helaas, er is iets misgegaan of dit emailadres is reeds in gebruik.";
           })
           .then(
+            // When it was succesfull visually show it and empty the fields.
             response => {},
             (this.successFeedback = "Succes!"),
             (this.name = ""),
@@ -156,8 +161,7 @@ export default {
         this.successFeedback =
           "Je moet alle velden invullen en je wachtwoord bevestiging moet hetzelfde zijn ";
       }
-    },
-    addUserToLocalStorage() {}
+    }
   }
 };
 </script>

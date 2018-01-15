@@ -2,6 +2,7 @@
   <header>
     <nav class="navbar grey lighten-5 z-depth-4 nav-extended">
       <ul id="slide-out" class="side-nav">
+        <!-- Change the menu navigation if the user is signed in. -->
         <li>
           <div class="user-view">
             <div class="background orange-bg"></div>
@@ -41,9 +42,6 @@
             </router-link>
           </li>
         </ul>
-        <!--<a href="#" data-activates="slide-out" class="button-collapse grey-text text-lighten-1"><i class="material-icons">menu</i></a>-->
-        <!--<a href="#" class="grey-text text-lighten-1"><i class="material-icons">menu</i></a>-->
-        <!--<a href="#" class="grey-text text-lighten-1"><i class="material-icons">person_outline</i></a>-->
       </div>
     </nav>
   </header>
@@ -52,6 +50,8 @@
 <script>
 import axios from "axios";
 import router from "./../router";
+// Import a bus component to pass methodes over other components.
+// We use this to edit the Menu navigation.
 import { bus } from "../main";
 
 export default {
@@ -65,6 +65,7 @@ export default {
     };
   },
   created() {
+    // Continuously check if we recieve bus events, change menu accordingly.
     bus.$on("userLogin", () => {
       this.checkIfOnline();
     });
@@ -76,24 +77,27 @@ export default {
     this.checkIfOnline();
   },
   methods: {
+    // Remove localStorage if logout and remove menu items.
     logout() {
-      //alert('testlogout')
       this.fullName = "Je bent afgemeld...";
       this.loggedIn = false;
       localStorage.removeItem("currentUser");
       localStorage.removeItem("passwordInfo");
       localStorage.removeItem("hasDrivingLicense");
       localStorage.removeItem("hasSubscription");
+      // Go to login page.
       this.$router.push("Login");
     },
     checkIfOnline() {
-      //alert('alertifonline')
       self = this;
+      // Default behaviour: signed out but check if signed in.
       if (localStorage.getItem("currentUser") == null) {
         self.fullName = "Je bent afgemeld...";
       } else {
+        // Change menu items and get name of the user.
         this.loggedIn = true;
         let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        // Unhash the password from localStorage.
         let password = atob(JSON.parse(localStorage.getItem("passwordInfo")));
         let userName = currentUser.current_user.name;
 
@@ -108,6 +112,7 @@ export default {
             Accept: "application/json",
             "Content-Type": "application/json"
           },
+          // Authentication by the user itself.
           auth: {
             username: userName,
             password: password
@@ -117,11 +122,12 @@ export default {
         axios
           .get(url, config)
           .then(({ data: users }) => {
-            console.log(users);
+            // Get the full name of the user.
             this.fullName =
               users.field_name[0].value + " " + users.field_surname[0].value;
           })
           .catch(({ message: error }) => {
+            // Write the errors in the console when you can't get the user info.
             console.info(error);
           });
       }

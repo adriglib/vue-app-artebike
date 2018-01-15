@@ -1,6 +1,5 @@
 <template>
   <div class="contentcontainer valign-wrapper">
-    <!-- Page Content goes here -->
     <div class="content align-center" >
       <div class="info-block center-align row">
         <h1>Login</h1><br>
@@ -38,6 +37,8 @@
 <script>
 import axios from "axios";
 import router from "vue-router";
+// Import a bus component to pass methodes over other components.
+// We use this to edit the Menu navigation.
 import { bus } from "../main";
 
 export default {
@@ -53,19 +54,8 @@ export default {
       hasPayed: false
     };
   },
-  //    created () {
-  //      axios
-  //        .get('http://cms.localhost/api/locations')
-  //        .then(({data:locations}) => {
-  //          this.locationsArray = locations
-  //          this.loaded = true
-  //          this.mounted()
-  //        })
-  //        .catch(({message: error}) => {
-  //          console.info(error)
-  //        })
-  //    },
   methods: {
+    // Sign in the user.
     loginUser() {
       let self = this;
 
@@ -85,7 +75,10 @@ export default {
           config
         )
         .then(function(response) {
+          // User succesfully signed in.
+          // Set user info in localStorage for use in other components.
           localStorage.setItem("currentUser", JSON.stringify(response.data));
+          // Hash the password and place in localStorage.
           localStorage.setItem(
             "passwordInfo",
             JSON.stringify(btoa(self.login.password))
@@ -109,6 +102,7 @@ export default {
           axios
             .get(url, config)
             .then(({ data: users }) => {
+              // Get user data, check if he has a drivers licence and a subscription.
               localStorage.setItem(
                 "hasDrivingLicense",
                 JSON.stringify({ rijbewijs: users.field_rijbewijs[0].value })
@@ -116,17 +110,21 @@ export default {
               self.checkIfPayed(users.field_begin_abonnement[0].value);
             })
             .catch(({ message: error }) => {
+              // Write the errors in the console when you can't get the userinfo.
               console.info(error);
             });
+          // Let the Menu change because user is signed in.
           bus.$emit("userLogin", true);
+          // Go to home.
           self.$router.push("/");
         });
     },
-
+    // Method to check if the user has a subscription.
     checkIfPayed(abonnementDatum) {
       if (abonnementDatum == null) {
         this.hasPayed = false;
       } else {
+        // User has subscription info, check if it is active right now.
         let date = new Date();
         let beginSubscription = abonnementDatum;
         let rawEndSubscription = new Date(beginSubscription);
@@ -149,15 +147,16 @@ export default {
           parseInt(date.getMonth() + 1) +
           "-" +
           date.getDate();
-
+        // Check if subscription is active.
         if (this.dateCheck(beginSubscription, endSubscription, currentDay))
           this.hasPayed = true;
         else this.hasPayed = false;
+        // Write in localStorage if he has or doesn't have a subscription.
         localStorage.setItem("hasSubscription", this.hasPayed);
         return this.hasPayed;
       }
     },
-
+    // Method to check if the currentday is between the start and end of subscription.
     dateCheck(from, to, check) {
       let fDate, lDate, cDate;
       fDate = Date.parse(from);
