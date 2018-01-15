@@ -18,8 +18,6 @@
         <div v-if="loggedIn" class="divider"></div>
         <li v-if="loggedIn == false"><router-link to="/login" class="waves-effect"><i class="material-icons">input</i>Login</router-link></li>
         <li v-if="loggedIn == false"><router-link to="/registreren" class="waves-effect"><i class="material-icons">add</i>Registreren</router-link></li>
-        <li><router-link to="" class="waves-effect"><i class="material-icons">info</i>Voorwaarden</router-link></li>
-        <li><router-link to="" class="waves-effect"><i class="material-icons">help</i>Hulp</router-link></li>
       </ul>
       <div class="row col s12">
         <ul class="col s12 menu-items">
@@ -32,7 +30,7 @@
           <li class="col s4">
             <router-link to="/" class="center-align grey-text text-lighten-1">
               <i class="material-icons">battery_charging_full</i>
-              <span class="grey-text text-darken-3">Reserveer</span>
+              <span class="grey-text text-darken-3">Home</span>
             </router-link>
           </li>
           <li class="col s4 active">

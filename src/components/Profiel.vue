@@ -6,7 +6,7 @@
           <h3 class="orange col s10 offset-s1 center-align">{{ fullName }}</h3>
         </div>
         <div @click="logout"><router-link to="login" class="col s6 offset-s3 btn waves-effect waves-light" type="submit" name="action">
-          Sign out
+          Afmelden
         </router-link></div>
       </div>
       <div class="row">
