@@ -11,16 +11,14 @@ import WijzigReservatie from '@/components/WijzigReservatie'
 Vue.use(Router)
 
 export default new Router({
-  routes: [
-    {
+  routes: [{
       path: '/',
       name: 'home',
       component: Home,
       beforeEnter: (to, from, next) => {
-        if(localStorage.getItem('currentUser') == null){
+        if (localStorage.getItem('currentUser') == null) {
           next('/login')
-        }
-        else{
+        } else {
           next()
         }
       }
@@ -39,12 +37,13 @@ export default new Router({
       path: '/reserveren',
       name: 'Reserveren',
       component: Reserveren,
-      props: { currentRoute: 'reserveren' },
+      props: {
+        currentRoute: 'reserveren'
+      },
       beforeEnter: (to, from, next) => {
-        if(localStorage.getItem('currentUser') == null){
+        if (localStorage.getItem('currentUser') == null) {
           next('/login')
-        }
-        else
+        } else
           next()
       }
     },
@@ -52,12 +51,13 @@ export default new Router({
       path: '/profiel',
       name: 'Profiel',
       component: Profiel,
-      props: { currentRoute: 'profiel' },
+      props: {
+        currentRoute: 'profiel'
+      },
       beforeEnter: (to, from, next) => {
-        if(localStorage.getItem('currentUser') == null){
+        if (localStorage.getItem('currentUser') == null) {
           next('/login')
-        }
-        else
+        } else
           next()
       }
     },
@@ -66,10 +66,9 @@ export default new Router({
       // name: 'Profiel',
       component: Navigatie,
       beforeEnter: (to, from, next) => {
-        if(localStorage.getItem('currentUser') == null){
+        if (localStorage.getItem('currentUser') == null) {
           next('/login')
-        }
-        else
+        } else
           next()
       }
     },
@@ -78,10 +77,9 @@ export default new Router({
       name: 'wijzigreservatie',
       component: WijzigReservatie,
       beforeEnter: (to, from, next) => {
-        if(localStorage.getItem('currentUser') == null){
+        if (localStorage.getItem('currentUser') == null) {
           next('/login')
-        }
-        else
+        } else
           next()
       }
     }

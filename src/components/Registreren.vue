@@ -57,119 +57,107 @@
 </template>
 
 <script>
-  import axios from 'axios'
+import axios from "axios";
 
-  export default {
-    name: 'hello',
-    data () {
-      return {
-        allStudents: [],
-        studentName: '',
-        addStudentField: '',
-        errors: [],
-        successFeedback: '',
-        name: '',
-        surname: '',
-        fullname: '',
-        rijbewijs: false,
-        email: '',
-        password: '',
-        passwordConfirm: ''
-      }
-    },
-    created () {
-//      axios
-//        .get('http://cms.localhost/user',
-//          {
-//            auth: {
-//              username: 'admin',
-//              password: 'secret'
-//            },
-//            headers: {
-//              'X-CSRF-Token': 'BsGhinsLa2wzQv9tPzaPbmZb_qxPJAUasEK2XjipaOY',
-//              'Accept': 'application/json',
-//              'Content-Type': 'application/json'
-//            }
-//          }
-//        )
-//        .then(({data:users}) => {
-//          this.allStudents = users
-//        })
-//        .catch(({message: error}) => {
-//          console.info(error)
-//        })
-    },
-    methods: {
-      addUser () {
-        let config = {
-          headers: {
-            'X-CSRF-Token': 'BsGhinsLa2wzQv9tPzaPbmZb_qxPJAUasEK2XjipaOY',
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          auth: {
-            username: 'cms-user',
-            password: 'secret'
-          },
-        };
-        if(this.password == this.passwordConfirm && this.name != null && this.surname != null && this.email != null && this.passwordConfirm != null){
-          axios.post(`http://cms.localhost/entity/user`,
+export default {
+  name: "hello",
+  data() {
+    return {
+      allStudents: [],
+      studentName: "",
+      addStudentField: "",
+      errors: [],
+      successFeedback: "",
+      name: "",
+      surname: "",
+      fullname: "",
+      rijbewijs: false,
+      email: "",
+      password: "",
+      passwordConfirm: ""
+    };
+  },
+  methods: {
+    addUser() {
+      let config = {
+        headers: {
+          "X-CSRF-Token": "BsGhinsLa2wzQv9tPzaPbmZb_qxPJAUasEK2XjipaOY",
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        auth: {
+          username: "cms-user",
+          password: "secret"
+        }
+      };
+      if (
+        this.password == this.passwordConfirm &&
+        this.name != null &&
+        this.surname != null &&
+        this.email != null &&
+        this.passwordConfirm != null
+      ) {
+        axios
+          .post(
+            `http://cms.localhost/entity/user`,
             {
-              'name': [
+              name: [
                 {
-                  'value': this.email + '@student.arteveldehs.be'
+                  value: this.email + "@student.arteveldehs.be"
                 }
               ],
-              'mail': [
+              mail: [
                 {
-                  'value': this.email + '@student.arteveldehs.be'
+                  value: this.email + "@student.arteveldehs.be"
                 }
               ],
-              'field_name': [
+              field_name: [
                 {
-                  'value': this.name
+                  value: this.name
                 }
               ],
-              'field_surname': [
+              field_surname: [
                 {
-                  'value': this.surname
+                  value: this.surname
                 }
               ],
-              'field_rijbewijs': [
+              field_rijbewijs: [
                 {
-                  'value': this.rijbewijs
+                  value: this.rijbewijs
                 }
               ],
-              'pass': [
+              pass: [
                 {
-                  'value': this.password
+                  value: this.password
                 }
               ],
-              'status': [
+              status: [
                 {
-                  'value': '1'
+                  value: "1"
                 }
-              ],
-            }, config)
-            .catch(e => {
-            this.successFeedback = 'Helaas, er is iets misgegaan of dit emailadres is reeds in gebruik.'
-            })
-            .then(response => {},
-              this.successFeedback = 'Succes!',
-              this.name = '',
-              this.surname = '',
-              this.mail = '',
-              this.password = '',
-              this.passwordConfirm = ''
-            )
-        }
-        else {
-          this.successFeedback = 'Je moet alle velden invullen en je wachtwoord bevestiging moet hetzelfde zijn '
-        }
-      },
-      addUserToLocalStorage () {
-
+              ]
+            },
+            config
+          )
+          .catch(e => {
+            this.successFeedback =
+              "Helaas, er is iets misgegaan of dit emailadres is reeds in gebruik.";
+          })
+          .then(
+            response => {},
+            (this.successFeedback = "Succes!"),
+            (this.name = ""),
+            (this.surname = ""),
+            (this.mail = ""),
+            (this.password = ""),
+            (this.passwordConfirm = "")
+          );
+      } else {
+        this.successFeedback =
+          "Je moet alle velden invullen en je wachtwoord bevestiging moet hetzelfde zijn ";
       }
-    }
+    },
+    addUserToLocalStorage() {}
   }
+};
 </script>

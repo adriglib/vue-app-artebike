@@ -4,10 +4,7 @@
       <ul id="slide-out" class="side-nav">
         <li>
           <div class="user-view">
-            <div class="background orange-bg">
-              <!--<img src="img/background-sidebar.jpg">-->
-            </div>
-            <!--<router-link to="/"><img class="" src="static/img/logo_white.png"></router-link>-->
+            <div class="background orange-bg"></div>
             <router-link v-if="loggedIn == false" to="/login" style="padding-bottom: 20px;"><span class="white-text name">{{ fullName }}</span></router-link>
             <router-link v-if="loggedIn" to="/profiel" style="padding-bottom: 20px;"><span class="white-text name">{{ fullName }}</span><span>{{ email }}</span></router-link>
           </div>
@@ -53,81 +50,82 @@
 </template>
 
 <script>
-  import axios from 'axios'
-  import router from './../router'
-  import { bus } from '../main';
+import axios from "axios";
+import router from "./../router";
+import { bus } from "../main";
 
-  export default {
-    name: 'profiel',
-    data () {
-      return {
-        userID: '',
-        fullName: 'Je bent afgemeld...',
-        email: '',
-        loggedIn: false
+export default {
+  name: "profiel",
+  data() {
+    return {
+      userID: "",
+      fullName: "Je bent afgemeld...",
+      email: "",
+      loggedIn: false
+    };
+  },
+  created() {
+    bus.$on("userLogin", () => {
+      this.checkIfOnline();
+    });
+    bus.$on("userLogout", () => {
+      this.logout();
+    });
+  },
+  mounted() {
+    this.checkIfOnline();
+  },
+  methods: {
+    logout() {
+      //alert('testlogout')
+      this.fullName = "Je bent afgemeld...";
+      this.loggedIn = false;
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("passwordInfo");
+      localStorage.removeItem("hasDrivingLicense");
+      localStorage.removeItem("hasSubscription");
+      this.$router.push("Login");
+    },
+    checkIfOnline() {
+      //alert('alertifonline')
+      self = this;
+      if (localStorage.getItem("currentUser") == null) {
+        self.fullName = "Je bent afgemeld...";
+      } else {
+        this.loggedIn = true;
+        let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        let password = atob(JSON.parse(localStorage.getItem("passwordInfo")));
+        let userName = currentUser.current_user.name;
+
+        this.email = currentUser.current_user.name;
+        let userID = currentUser.current_user.uid;
+        let csrf = currentUser.csrf_token;
+        let url = "http://cms.localhost/user/" + userID + "?_format=json";
+
+        let config = {
+          headers: {
+            "X-CSRF-Token": csrf,
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          },
+          auth: {
+            username: userName,
+            password: password
+          }
+        };
+
+        axios
+          .get(url, config)
+          .then(({ data: users }) => {
+            console.log(users);
+            this.fullName =
+              users.field_name[0].value + " " + users.field_surname[0].value;
+          })
+          .catch(({ message: error }) => {
+            console.info(error);
+          });
       }
-    },
-    created () {
-      bus.$on('userLogin', () => {
-        this.checkIfOnline()
-      })
-      bus.$on('userLogout', () => {
-        this.logout()
-      })
-    },
-    mounted () {
-      this.checkIfOnline()
-    },
-    methods: {
-      logout() {
-        //alert('testlogout')
-        this.fullName = 'Je bent afgemeld...'
-        this.loggedIn = false
-        localStorage.removeItem('currentUser')
-        localStorage.removeItem('passwordInfo')
-        localStorage.removeItem('hasDrivingLicense')
-        localStorage.removeItem('hasSubscription')
-        this.$router.push('Login')
-      },
-      checkIfOnline () {
-       //alert('alertifonline')
-        self = this
-        if(localStorage.getItem('currentUser') == null){
-          self.fullName = 'Je bent afgemeld...'
-        }
-        else {
-          this.loggedIn = true
-          let currentUser = JSON.parse(localStorage.getItem('currentUser'))
-          let password = atob(JSON.parse(localStorage.getItem('passwordInfo')))
-          let userName = currentUser.current_user.name
-
-          this.email = currentUser.current_user.name
-          let userID = currentUser.current_user.uid
-          let csrf = currentUser.csrf_token
-          let url =  'http://cms.localhost/user/' + userID +'?_format=json'
-
-          let config = {
-            headers: {
-              'X-CSRF-Token': csrf,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'
-            },
-            auth: {
-              username: userName,
-              password: password
-            },
-          };
-
-          axios.get(url, config)
-            .then(({data:users}) => {
-              console.log(users)
-              this.fullName = users.field_name[0].value + ' ' + users.field_surname[0].value
-            })
-            .catch(({message: error}) => {
-              console.info(error)
-            })
-        }
-      },
     }
   }
+};
 </script>
